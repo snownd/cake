@@ -27,6 +27,14 @@ func makeJSONResponse(funcType reflect.Type, results *[]reflect.Value, body io.R
 	cache = make([]func([]byte, error) reflect.Value, 0)
 	resMutex.Lock()
 	defer resMutex.Unlock()
+	numOut := funcType.NumOut()
+	if numOut == 0 {
+		responseBuilderCache[funcType] = cache
+		return
+	}
+	if numOut > 2 {
+		panic(fmt.Errorf("%w: only support 0 to 2 results", ErrInvalidRequestFunction))
+	}
 	for i := 0; i < funcType.NumOut(); i++ {
 		t := funcType.Out(i)
 		switch t.Kind() {

@@ -2,6 +2,7 @@ package cake
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,10 +12,26 @@ import (
 	"strings"
 )
 
-type argBuilder func(args []reflect.Value, req *http.Request) error
-
 var _emptyValue reflect.Value
 var _nilError = reflect.Zero(reflect.TypeOf((*error)(nil)).Elem())
+
+type request struct {
+	ctx    context.Context
+	url    string
+	body   io.ReadCloser
+	header http.Header
+	method string
+}
+
+type argBuilder func(args []reflect.Value, req *request) error
+
+func newRequest(method string, opts *buildOptions) *request {
+	return &request{
+		method: method,
+		url:    opts.baseUrl,
+		header: make(http.Header),
+	}
+}
 
 func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, opts *buildOptions) (reflect.Value, error) {
 	builders := make([]argBuilder, 0)
@@ -34,9 +51,10 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 				err := fmt.Errorf("%w, only accept context interface, function %v", ErrInvalidRequestFunction, funcType)
 				return _emptyValue, err
 			}
-			builders = append(builders, func(args []reflect.Value, req *http.Request) error {
+			builders = append(builders, func(args []reflect.Value, req *request) error {
 				// todo
-				//	ctx := args[index].Interface().(context.Context)
+				ctx := args[index].Interface().(context.Context)
+				req.ctx = ctx
 				return nil
 			})
 		case reflect.Struct:
@@ -55,15 +73,16 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		}
 	}
 	return reflect.MakeFunc(funcType, func(args []reflect.Value) []reflect.Value {
-		req, err := newBaseRequest(opts, method)
+		r := newRequest(method, opts)
+		for _, builder := range builders {
+			if e := builder(args, r); e != nil {
+				// TODO
+				panic(e)
+			}
+		}
+		req, err := newHTTPRequest(r)
 		if err != nil {
 			panic(err)
-		}
-		for _, builder := range builders {
-			if e := builder(args, req); e != nil {
-				// TODO
-				panic(err)
-			}
 		}
 		res, err := opts.client.Do(req)
 		if err != nil {
@@ -92,7 +111,7 @@ func makeArgBuilderForRequestConfig(t reflect.Type, index int, url string) argBu
 		}
 	}
 	isPtr := t.Kind() == reflect.Ptr
-	return func(args []reflect.Value, req *http.Request) error {
+	return func(args []reflect.Value, req *request) error {
 		layers := make([]string, len(urlLayers))
 		copy(layers, urlLayers)
 		config := args[index]
@@ -117,7 +136,7 @@ func makeArgBuilderForRequestConfig(t reflect.Type, index int, url string) argBu
 					if tagValue == "-" {
 						key = fieldType.Name
 					}
-					req.Header.Set(key, field.String())
+					req.header.Set(key, field.String())
 				case APIFuncArgTagHeaders:
 					kind := fieldType.Type.Kind()
 					headers := field
@@ -131,7 +150,7 @@ func makeArgBuilderForRequestConfig(t reflect.Type, index int, url string) argBu
 							if !ok {
 								key = fieldType.Name
 							}
-							req.Header.Set(key, header.String())
+							req.header.Set(key, header.String())
 						}
 					} else if headers.Kind() == reflect.Map {
 						if fieldType.Type.Key().Kind() != reflect.String || fieldType.Type.Elem().Kind() != reflect.String {
@@ -139,7 +158,7 @@ func makeArgBuilderForRequestConfig(t reflect.Type, index int, url string) argBu
 						}
 						iter := headers.MapRange()
 						for iter.Next() {
-							req.Header.Set(iter.Key().String(), iter.Value().String())
+							req.header.Set(iter.Key().String(), iter.Value().String())
 						}
 					}
 				case APIFuncArgTagBody:
@@ -153,7 +172,7 @@ func makeArgBuilderForRequestConfig(t reflect.Type, index int, url string) argBu
 						if err != nil {
 							return err
 						}
-						req.Body = io.NopCloser(bytes.NewBuffer(body))
+						req.body = io.NopCloser(bytes.NewBuffer(body))
 					}
 				case APIFuncArgTagQuery:
 					key := tagValue
@@ -174,20 +193,25 @@ func makeArgBuilderForRequestConfig(t reflect.Type, index int, url string) argBu
 			}
 		}
 		if len(urlParams) > 0 {
-			req.URL.Path = req.URL.Path + strings.Join(layers, "/")
+			req.url = req.url + strings.Join(layers, "/")
 		} else {
-			req.URL.Path = req.URL.Path + url
+			req.url = req.url + url
 		}
 		if len(querys) > 0 {
-			req.URL.RawQuery = strings.Join(querys, "&")
+			// TODO escape
+			req.url = req.url + "?" + strings.Join(querys, "&")
 		}
 
 		return nil
 	}
 }
 
-func newBaseRequest(opts *buildOptions, method string) (*http.Request, error) {
-	req, err := http.NewRequest(method, opts.baseUrl, nil)
+func newHTTPRequest(r *request) (*http.Request, error) {
+	ctx := r.ctx
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	req, err := http.NewRequestWithContext(ctx, r.method, r.url, r.body)
 	if err != nil {
 		return nil, err
 	}

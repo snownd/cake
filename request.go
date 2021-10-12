@@ -1,14 +1,11 @@
 package cake
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
@@ -100,111 +97,6 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		}
 		return results
 	}), nil
-}
-
-// BenchmarkCakeGet-4         	   14082	     86853 ns/op	    7292 B/op	      95 allocs/op
-func makeArgBuilderForRequestConfig(t reflect.Type, index int, url string) argBuilder {
-	urlLayers := strings.Split(url, "/")
-	urlParams := make(map[string]int)
-	for i, l := range urlLayers {
-		if strings.HasPrefix(l, ":") {
-			urlParams[l[1:]] = i
-		}
-	}
-	isPtr := t.Kind() == reflect.Ptr
-	return func(args []reflect.Value, req *request) error {
-		layers := make([]string, len(urlLayers))
-		copy(layers, urlLayers)
-		config := args[index]
-
-		if isPtr {
-			config = config.Elem()
-		}
-		querys := make([]string, 0)
-		for i := 0; i < config.NumField(); i++ {
-			field := config.Field(i)
-			fieldType := t.Elem().Field(i)
-			tagmap := NewTagMap(fieldType.Tag)
-			for tagName, tagValue := range tagmap {
-				switch tagName {
-				case APIFuncArgTagParam:
-					index, ok := urlParams[tagValue]
-					if ok {
-						layers[index] = field.String()
-					}
-				case APIFuncArgTagHeader:
-					key := tagValue
-					if tagValue == "-" {
-						key = fieldType.Name
-					}
-					req.header.Set(key, field.String())
-				case APIFuncArgTagHeaders:
-					kind := fieldType.Type.Kind()
-					headers := field
-					if kind == reflect.Ptr {
-						headers = field.Elem()
-					}
-					if headers.Kind() == reflect.Struct {
-						for h := 0; h < headers.NumField(); h++ {
-							header := headers.Field(i)
-							key, ok := fieldType.Type.Field(i).Tag.Lookup(APIFuncArgTagHeader)
-							if !ok {
-								key = fieldType.Name
-							}
-							req.header.Set(key, header.String())
-						}
-					} else if headers.Kind() == reflect.Map {
-						if fieldType.Type.Key().Kind() != reflect.String || fieldType.Type.Elem().Kind() != reflect.String {
-							return fmt.Errorf("%w with tag headers only support map[string]string", ErrInvalidRequestFunction)
-						}
-						iter := headers.MapRange()
-						for iter.Next() {
-							req.header.Set(iter.Key().String(), iter.Value().String())
-						}
-					}
-				case APIFuncArgTagBody:
-					kind := fieldType.Type.Kind()
-					if kind == reflect.Struct ||
-						(kind == reflect.Ptr && fieldType.Type.Elem().Kind() == reflect.Struct) ||
-						kind == reflect.Map ||
-						kind == reflect.Slice ||
-						kind == reflect.Array {
-						body, err := json.Marshal(field.Interface())
-						if err != nil {
-							return err
-						}
-						req.body = io.NopCloser(bytes.NewBuffer(body))
-					}
-				case APIFuncArgTagQuery:
-					key := tagValue
-					kind := fieldType.Type.Kind()
-					switch kind {
-					case reflect.String:
-						querys = append(querys, key+"="+field.String())
-					case reflect.Bool:
-						querys = append(querys, key+"="+strconv.FormatBool(field.Bool()))
-					case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-						querys = append(querys, key+"="+strconv.FormatInt(field.Int(), 10))
-					case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-						querys = append(querys, key+"="+strconv.FormatUint(field.Uint(), 10))
-					case reflect.Float32, reflect.Float64:
-						querys = append(querys, key+"="+strconv.FormatFloat(field.Float(), 'f', -1, 64))
-					}
-				}
-			}
-		}
-		if len(urlParams) > 0 {
-			req.url = req.url + strings.Join(layers, "/")
-		} else {
-			req.url = req.url + url
-		}
-		if len(querys) > 0 {
-			// TODO escape
-			req.url = req.url + "?" + strings.Join(querys, "&")
-		}
-
-		return nil
-	}
 }
 
 func newHTTPRequest(r *request) (*http.Request, error) {

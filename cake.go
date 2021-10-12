@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const Version = "0.1.0"
+
 type Factory struct {
 	lock *sync.RWMutex
 	// cache  map[int]interface{}

@@ -45,7 +45,7 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string)
 					key = fieldType.Name
 				}
 				builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
-					req.header.Add(key, field.String())
+					req.header.Set(key, field.String())
 					return nil
 				}
 			case APIFuncArgTagHeaders:

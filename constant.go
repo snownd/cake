@@ -7,6 +7,8 @@ import (
 
 type RequestMethod = string
 
+var UserAgent = "cake/" + Version
+
 const (
 	MethodGet     RequestMethod = http.MethodGet
 	MethodPost    RequestMethod = http.MethodPost

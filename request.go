@@ -59,12 +59,12 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 			})
 		case reflect.Struct:
 			if IsRequestConfig(argType) {
-				ab := makeArgBuilderForRequestConfig(argType, index, apiDefTagMap[TagURL])
+				ab := makeArgBuilderForRequestConfigCached(argType, index, apiDefTagMap[TagURL])
 				builders = append(builders, ab)
 			}
 		case reflect.Ptr:
 			if IsRequestConfig(argType.Elem()) {
-				ab := makeArgBuilderForRequestConfig(argType, index, apiDefTagMap[TagURL])
+				ab := makeArgBuilderForRequestConfigCached(argType, index, apiDefTagMap[TagURL])
 				builders = append(builders, ab)
 			}
 		default:
@@ -102,6 +102,7 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 	}), nil
 }
 
+// BenchmarkCakeGet-4         	   14082	     86853 ns/op	    7292 B/op	      95 allocs/op
 func makeArgBuilderForRequestConfig(t reflect.Type, index int, url string) argBuilder {
 	urlLayers := strings.Split(url, "/")
 	urlParams := make(map[string]int)

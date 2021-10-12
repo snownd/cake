@@ -215,5 +215,10 @@ func newHTTPRequest(r *request) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+	if len(r.header) > 0 {
+		for k, v := range r.header {
+			req.Header[k] = v
+		}
+	}
 	return req, nil
 }

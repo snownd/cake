@@ -14,7 +14,7 @@ import (
 var _emptyValue reflect.Value
 var _nilError = reflect.Zero(reflect.TypeOf((*error)(nil)).Elem())
 
-type request struct {
+type requestTemplate struct {
 	ctx    context.Context
 	url    string
 	body   io.ReadCloser
@@ -22,10 +22,10 @@ type request struct {
 	method string
 }
 
-type argBuilder func(args []reflect.Value, req *request) error
+type argBuilder func(args []reflect.Value, req *requestTemplate) error
 
-func newRequest(method string, opts *buildOptions) *request {
-	return &request{
+func newRequest(method string, opts *buildOptions) *requestTemplate {
+	return &requestTemplate{
 		method: method,
 		url:    opts.baseUrl,
 		header: make(http.Header),
@@ -50,7 +50,7 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 				err := fmt.Errorf("%w, only accept context interface, function %v", ErrInvalidRequestFunction, funcType)
 				return _emptyValue, err
 			}
-			builders = append(builders, func(args []reflect.Value, req *request) error {
+			builders = append(builders, func(args []reflect.Value, req *requestTemplate) error {
 				// todo
 				ctx := args[index].Interface().(context.Context)
 				req.ctx = ctx
@@ -119,7 +119,7 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 	}), nil
 }
 
-func newHTTPRequest(r *request) (*http.Request, error) {
+func newHTTPRequest(r *requestTemplate) (*http.Request, error) {
 	ctx := r.ctx
 	if ctx == nil {
 		ctx = context.Background()

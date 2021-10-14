@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type requestConfigFieldBuilder func(field reflect.Value, req *request, layers []string, querys *[]string) error
+type requestConfigFieldBuilder func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error
 
 func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string) argBuilder {
 	urlLayers := strings.Split(url, "/")
@@ -34,7 +34,7 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string)
 			case APIFuncArgTagParam:
 				l, ok := urlParams[tagValue]
 				if ok {
-					builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
+					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 						layers[l] = field.String()
 						return nil
 					}
@@ -44,13 +44,13 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string)
 				if tagValue == "-" {
 					key = fieldType.Name
 				}
-				builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
+				builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 					req.header.Set(key, field.String())
 					return nil
 				}
 			case APIFuncArgTagHeaders:
 				kind := fieldType.Type.Kind()
-				builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
+				builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 					headers := field
 					if kind == reflect.Ptr {
 						headers = field.Elem()
@@ -82,7 +82,7 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string)
 					kind == reflect.Map ||
 					kind == reflect.Slice ||
 					kind == reflect.Array {
-					builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
+					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 						body, err := json.Marshal(field.Interface())
 						if err != nil {
 							return err
@@ -96,27 +96,27 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string)
 				kind := fieldType.Type.Kind()
 				switch kind {
 				case reflect.String:
-					builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
+					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 						*querys = append(*querys, key+"="+field.String())
 						return nil
 					}
 				case reflect.Bool:
-					builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
+					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 						*querys = append(*querys, key+"="+strconv.FormatBool(field.Bool()))
 						return nil
 					}
 				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-					builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
+					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 						*querys = append(*querys, key+"="+strconv.FormatInt(field.Int(), 10))
 						return nil
 					}
 				case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-					builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
+					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 						*querys = append(*querys, key+"="+strconv.FormatUint(field.Uint(), 10))
 						return nil
 					}
 				case reflect.Float32, reflect.Float64:
-					builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
+					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 						*querys = append(*querys, key+"="+strconv.FormatFloat(field.Float(), 'f', -1, 64))
 						return nil
 					}
@@ -125,7 +125,7 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string)
 		}
 	}
 
-	return func(args []reflect.Value, req *request) error {
+	return func(args []reflect.Value, req *requestTemplate) error {
 		layers := make([]string, len(urlLayers))
 		copy(layers, urlLayers)
 		config := args[index]

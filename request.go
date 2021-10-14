@@ -24,7 +24,7 @@ type requestTemplate struct {
 
 type argBuilder func(args []reflect.Value, req *requestTemplate) error
 
-func newRequest(method string, opts *buildOptions) *requestTemplate {
+func newRequestTemplate(method string, opts *buildOptions) *requestTemplate {
 	return &requestTemplate{
 		method: method,
 		url:    opts.baseUrl,
@@ -69,6 +69,25 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		default:
 			err := fmt.Errorf("%w, arg types must be one of: %s,%s or %s", ErrInvalidRequestFunction, reflect.Interface, reflect.Struct, reflect.Ptr)
 			return _emptyValue, err
+		}
+	}
+	newRequest := newRequestTemplate
+	if functionLevelHeaderTemplate, ok := apiDefTagMap[TagHeaders]; ok {
+		headersList := strings.Split(functionLevelHeaderTemplate, ";")
+		functionLevelHeaders := make(http.Header)
+		for _, h := range headersList {
+			kv := strings.Split(h, "=")
+			// ignore invalid header format
+			if len(kv) == 2 {
+				functionLevelHeaders[kv[0]] = strings.Split(kv[1], ",")
+			}
+		}
+		newRequest = func(method string, opts *buildOptions) *requestTemplate {
+			r := newRequestTemplate(method, opts)
+			for k, v := range functionLevelHeaders {
+				r.header[k] = v
+			}
+			return r
 		}
 	}
 	return reflect.MakeFunc(funcType, func(args []reflect.Value) []reflect.Value {

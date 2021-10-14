@@ -41,9 +41,9 @@ const (
 )
 
 const (
-	TagMethod = "method"
-	TagURL    = "url"
-	TagHeader = "header"
+	TagMethod  = "method"
+	TagURL     = "url"
+	TagHeaders = "headers"
 )
 
 var ErrInvalidBuildTarget = errors.New("cake: invalid build target")

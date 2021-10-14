@@ -21,8 +21,7 @@ type User struct {
 
 type UserRequestConfig struct {
 	cake.RequestConfig
-	ID       string `param:"id"`
-	XTraceID string `header:"X-Trace-Id"`
+	ID string `param:"id"`
 }
 
 type UserListRequestConfig struct {
@@ -42,7 +41,7 @@ type UserListRequestConfig struct {
 //  },
 type TestApi struct {
 	// default method = GET
-	User  func(ctx context.Context, config *UserRequestConfig) (*User, error)       `url:"/users/:id"`
+	User  func(ctx context.Context, config *UserRequestConfig) (*User, error)       `url:"/users/:id" headers:"x-request-name=users;x-request-app=cake-example"`
 	Users func(ctx context.Context, config *UserListRequestConfig) ([]*User, error) `method:"GET" url:"/users"`
 }
 

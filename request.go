@@ -1,6 +1,8 @@
 package cake
 
 import (
+	"compress/flate"
+	"compress/gzip"
 	"context"
 	"fmt"
 	"io"
@@ -91,9 +93,27 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		if res.ContentLength == 0 || funcType.NumOut() == 0 {
 			return results
 		}
-		contentType := res.Header.Get("Content-Type")
+		var body []byte
+		// fmt.Println(res.Header.Get(HeaderContentEncoding))
+		switch res.Header.Get(HeaderContentEncoding) {
+		case "gzip":
+			reader, e := gzip.NewReader(res.Body)
+			defer reader.Close()
+			if e == nil {
+				body, err = io.ReadAll(reader)
+			} else {
+				err = e
+			}
+		case "deflate":
+			reader := flate.NewReader(res.Body)
+			defer reader.Close()
+			body, err = io.ReadAll(reader)
+		default:
+			body, err = io.ReadAll(res.Body)
+		}
+		contentType := res.Header.Get(HeaderContentType)
 		if contentType == "application/json" {
-			makeJSONResponse(funcType, &results, res.Body)
+			makeJSONResponse(funcType, &results, body, err)
 		}
 		return results
 	}), nil
@@ -120,7 +140,7 @@ func newHTTPRequest(r *request) (*http.Request, error) {
 	}
 	req.Header[HeaderAccept] = Accept
 	req.Header[HeaderUserAgent] = UserAgent
-	// TODO req.Header["Accept-Encoding"] = []string{"gzip", "deflate"}
+	req.Header[HeaderAcceptEncoding] = AcceptEncoding
 
 	return req, nil
 }

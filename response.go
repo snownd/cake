@@ -3,7 +3,6 @@ package cake
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"reflect"
 	"sync"
 )
@@ -13,11 +12,11 @@ type responseBuilder = func([]byte, error) reflect.Value
 var responseBuilderCache map[reflect.Type][]responseBuilder = make(map[reflect.Type][]func([]byte, error) reflect.Value)
 var resMutex *sync.RWMutex = &sync.RWMutex{}
 
-func makeJSONResponse(funcType reflect.Type, results *[]reflect.Value, body io.ReadCloser) {
+func makeJSONResponse(funcType reflect.Type, results *[]reflect.Value, data []byte, err error) {
 	resMutex.RLock()
 	cache, ok := responseBuilderCache[funcType]
 	resMutex.RUnlock()
-	data, err := io.ReadAll(body)
+	// data, err := io.ReadAll(body)
 	if ok {
 		for _, builder := range cache {
 			*results = append(*results, builder(data, err))

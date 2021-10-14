@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -54,7 +55,7 @@ func main() {
 	}
 	api := apiIntf.(*TestApi)
 	u, err := api.Users(context.Background(), &UserListRequestConfig{
-		Limit:    3,
+		Limit:    10,
 		Page:     1,
 		XTraceID: "caketest1",
 	})
@@ -63,5 +64,7 @@ func main() {
 	}
 	r, _ := json.Marshal(u)
 	fmt.Println(string(r))
-
+	if len(u) != 10 {
+		panic(errors.New("invalid result set"))
+	}
 }

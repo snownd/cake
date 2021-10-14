@@ -9,12 +9,14 @@ type RequestMethod = string
 
 var UserAgent = []string{"cake/" + Version}
 var Accept = []string{"application/json", "text/plain"}
+var AcceptEncoding = []string{"gzip", "deflate"}
 
 const (
-	HeaderAccept         = "Accept"
-	HeaderAcceptEncoding = "Accept-Encoding"
-	HeaderContentType    = "Content-Type"
-	HeaderUserAgent      = "User-Agent"
+	HeaderAccept          = "Accept"
+	HeaderAcceptEncoding  = "Accept-Encoding"
+	HeaderContentType     = "Content-Type"
+	HeaderContentEncoding = "Content-Encoding"
+	HeaderUserAgent       = "User-Agent"
 )
 
 const (

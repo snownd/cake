@@ -7,7 +7,15 @@ import (
 
 type RequestMethod = string
 
-var UserAgent = "cake/" + Version
+var UserAgent = []string{"cake/" + Version}
+var Accept = []string{"application/json", "text/plain"}
+
+const (
+	HeaderAccept         = "Accept"
+	HeaderAcceptEncoding = "Accept-Encoding"
+	HeaderContentType    = "Content-Type"
+	HeaderUserAgent      = "User-Agent"
+)
 
 const (
 	MethodGet     RequestMethod = http.MethodGet

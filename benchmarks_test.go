@@ -30,6 +30,9 @@ var msg = []byte(`{"foo":"bar", "bar":["foo1", "foo2"]}`)
 
 func BenchmarkHTTPClientGet(b *testing.B) {
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if queryFoo := r.URL.Query().Get("foo"); queryFoo == "" {
+			b.Fatal("queryMissed", r.URL)
+		}
 		rw.Header().Add("Content-Type", "application/json")
 		rw.Write(msg)
 	}))
@@ -44,7 +47,7 @@ func BenchmarkHTTPClientGet(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		res, err := cl.Get(ts.URL + "/data/" + strconv.Itoa(i) + "?foo" + strconv.Itoa(i))
+		res, err := cl.Get(ts.URL + "/data/" + strconv.Itoa(i) + "?foo=" + strconv.Itoa(i))
 		if err != nil {
 			b.Fatal("Get:", err)
 		}
@@ -62,6 +65,9 @@ func BenchmarkHTTPClientGet(b *testing.B) {
 
 func BenchmarkCakeGet(b *testing.B) {
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if queryFoo := r.URL.Query().Get("foo"); queryFoo == "" {
+			b.Fatal("queryMissed", r.URL)
+		}
 		rw.Header().Add("Content-Type", "application/json")
 		rw.Write(msg)
 

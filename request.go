@@ -114,12 +114,12 @@ func newHTTPRequest(r *request) (*http.Request, error) {
 		}
 	}
 	if r.body != nil {
-		if cts := req.Header.Values("Content-Type"); len(cts) == 0 {
-			req.Header.Set("Content-Type", "text/plain")
+		if cts := req.Header.Values(HeaderContentType); len(cts) == 0 {
+			req.Header.Set(HeaderContentType, "text/plain")
 		}
 	}
-	req.Header["Accept"] = []string{"application/json", "text/plain"}
-	req.Header["User-Agent"] = []string{UserAgent}
+	req.Header[HeaderAccept] = Accept
+	req.Header[HeaderUserAgent] = UserAgent
 	// TODO req.Header["Accept-Encoding"] = []string{"gzip", "deflate"}
 
 	return req, nil

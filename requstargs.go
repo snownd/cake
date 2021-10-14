@@ -35,7 +35,7 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string)
 				l, ok := urlParams[tagValue]
 				if ok {
 					builders[i] = func(field reflect.Value, req *request, layers []string, querys *[]string) error {
-						urlLayers[l] = field.String()
+						layers[l] = field.String()
 						return nil
 					}
 				}

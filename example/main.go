@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -31,29 +30,57 @@ type UserListRequestConfig struct {
 	XTraceID string `header:"X-Trace-Id"`
 }
 
-// https://61567ea3e039a0001725aa18.mockapi.io/api/v1
-// {
-//   "createdAt": "2021-09-30T22:22:18.253Z",
-//   "name": "Andres Weissnat",
-//   "avatar": "https://cdn.fakercloud.com/avatars/smalonso_128.jpg",
-//   "phone": "505-588-2692",
-//   "id": "1"
-//  },
+type UserCreateRequestConfig struct {
+	cake.RequestConfig
+	Data *User `body:""`
+}
+
 type TestApi struct {
 	// default method = GET
-	User  func(ctx context.Context, config *UserRequestConfig) (*User, error)       `url:"/users/:id" headers:"x-request-name=users;x-request-app=cake-example"`
-	Users func(ctx context.Context, config *UserListRequestConfig) ([]*User, error) `method:"GET" url:"/users"`
+	User       func(ctx context.Context, config *UserRequestConfig) (*User, error)       `url:"/users/:id" headers:"x-request-name=users;x-request-app=cake-example"`
+	Users      func(ctx context.Context, config *UserListRequestConfig) ([]*User, error) `method:"GET" url:"/users"`
+	CreateUser func(ctx context.Context, config *UserCreateRequestConfig) (*User, error) `method:"POST" url:"/users"`
+	DeleteUser func(ctx context.Context, config *UserRequestConfig) (*User, error)       `url:"/users/:id"`
 }
 
 func main() {
 
 	factory := cake.NewFactoryWithClient(http.DefaultClient)
-	apiIntf, err := factory.Build(&TestApi{}, cake.WithBaseURL("https://61567ea3e039a0001725aa18.mockapi.io/api/v1"))
+	// click https://mockapi.io/clone/61567ea3e039a0001725aa19 to create a mockapi project
+	apiIntf, err := factory.Build(&TestApi{}, cake.WithBaseURL("https://{id}.mockapi.io/api/v1"))
 	if err != nil {
 		panic(err)
 	}
 	api := apiIntf.(*TestApi)
-	u, err := api.Users(context.Background(), &UserListRequestConfig{
+	newUser, err := api.CreateUser(context.Background(), &UserCreateRequestConfig{
+		Data: &User{
+			Phone:  "710-839-4565 x109",
+			Name:   "New User",
+			Avatar: "https://cdn.fakercloud.com/avatars/carlosjgsousa_128.jpg",
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("create user", newUser)
+	user, err := api.User(context.Background(), &UserRequestConfig{
+		ID: newUser.ID,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("get user", user)
+	if newUser.Name != user.Name {
+		panic(errors.New("get wrong user"))
+	}
+	dUser, err := api.DeleteUser(context.Background(), &UserRequestConfig{
+		ID: newUser.ID,
+	})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("delete user", dUser)
+	users, err := api.Users(context.Background(), &UserListRequestConfig{
 		Limit:    10,
 		Page:     1,
 		XTraceID: "caketest1",
@@ -61,9 +88,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	r, _ := json.Marshal(u)
-	fmt.Println(string(r))
-	if len(u) != 10 {
+	if len(users) != 10 {
 		panic(errors.New("invalid result set"))
 	}
 }

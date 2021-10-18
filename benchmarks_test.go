@@ -1,15 +1,17 @@
 package cake_test
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/snownd/cake"
 )
+
+var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 type TestRes struct {
 	Foo string   `json:"foo"`

@@ -5,10 +5,13 @@ import (
 	"net/http"
 )
 
-type RequestMethod = string
+const (
+	ContentTypeJson = "application/json"
+	contentTypeText = "text/plain"
+)
 
 var UserAgent = []string{"cake/" + Version}
-var Accept = []string{"application/json", "text/plain"}
+var Accept = []string{ContentTypeJson, contentTypeText}
 var AcceptEncoding = []string{"gzip", "deflate"}
 
 const (
@@ -18,6 +21,8 @@ const (
 	HeaderContentEncoding = "Content-Encoding"
 	HeaderUserAgent       = "User-Agent"
 )
+
+type RequestMethod = string
 
 const (
 	MethodGet     RequestMethod = http.MethodGet
@@ -49,3 +54,5 @@ const (
 var ErrInvalidBuildTarget = errors.New("cake: invalid build target")
 
 var ErrInvalidRequestFunction = errors.New("cake: invalid request function")
+
+var ErrUnexpectedResponseContentType = errors.New("cake: unexpected resposne Content-Type")

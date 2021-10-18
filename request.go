@@ -109,13 +109,13 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		}
 		results := make([]reflect.Value, 0, funcType.NumOut())
 		defer res.Body.Close()
-		if res.ContentLength == 0 || funcType.NumOut() == 0 {
+		if funcType.NumOut() == 0 {
 			return results
 		}
 		var body []byte
 		// fmt.Println(res.Header.Get(HeaderContentEncoding))
 		switch res.Header.Get(HeaderContentEncoding) {
-		case "gzip":
+		case "gzip", "x-gzip":
 			reader, e := gzip.NewReader(res.Body)
 			defer reader.Close()
 			if e == nil {
@@ -130,10 +130,7 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		default:
 			body, err = io.ReadAll(res.Body)
 		}
-		contentType := res.Header.Get(HeaderContentType)
-		if contentType == "application/json" {
-			makeJSONResponse(funcType, &results, body, err)
-		}
+		makeResponse(funcType, res.Header.Get(HeaderContentType), &results, body, err)
 		return results
 	}), nil
 }

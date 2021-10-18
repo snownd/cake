@@ -3,7 +3,6 @@ package cake
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"reflect"
 	"strconv"
 	"strings"
@@ -86,7 +85,8 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string)
 						if err != nil {
 							return err
 						}
-						req.body = io.NopCloser(bytes.NewBuffer(body))
+						req.body = bytes.NewBuffer(body)
+						req.header.Set(HeaderContentType, ContentTypeJson)
 						return nil
 					}
 				}

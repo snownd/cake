@@ -17,7 +17,7 @@ var _nilError = reflect.Zero(reflect.TypeOf((*error)(nil)).Elem())
 type requestTemplate struct {
 	ctx    context.Context
 	url    string
-	body   io.ReadCloser
+	body   io.Reader
 	header http.Header
 	method string
 }

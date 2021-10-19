@@ -30,6 +30,13 @@ func WithBaseURL(url string) BuildOption {
 	}
 }
 
+func New() *Factory {
+	client := &http.Client{
+		Transport: createTransport(),
+	}
+	return NewFactoryWithClient(client)
+}
+
 func NewFactoryWithClient(client *http.Client) *Factory {
 	f := &Factory{
 		lock: &sync.RWMutex{},

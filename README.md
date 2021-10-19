@@ -74,7 +74,7 @@ For more, see [example](./example/main.go)
 
 ### Performance
 
-Ran `GOMAXPROCS=1 go test -bench=. -benchtime=5s -benchmem` on a Macbook Pro 2017 i5 version with go1.16.7:
+Ran `GOMAXPROCS=1 go test -bench=. -benchtime=5s -benchmem` on a Macbook Pro 2017 i5 with go1.16.7:
 
 ```
 goos: darwin

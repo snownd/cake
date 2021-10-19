@@ -19,6 +19,7 @@ const (
 	HeaderAcceptEncoding  = "Accept-Encoding"
 	HeaderContentType     = "Content-Type"
 	HeaderContentEncoding = "Content-Encoding"
+	HeaderContentLength   = "Content-Length"
 	HeaderUserAgent       = "User-Agent"
 )
 

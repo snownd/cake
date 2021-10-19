@@ -87,6 +87,7 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string)
 						}
 						req.body = bytes.NewBuffer(body)
 						req.header.Set(HeaderContentType, ContentTypeJson)
+						req.header.Set(HeaderContentLength, strconv.Itoa(len(body)))
 						return nil
 					}
 				}

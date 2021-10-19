@@ -35,7 +35,7 @@ type TestApi struct {
 
 func main() {
 	factory := cake.NewFactoryWithClient(http.DefaultClient)
-	apiIntf, err := factory.Build(&TestApi{}, cake.WithBaseURL("https://61567ea3e039a0001725aa18.mockapi.io/api/v1"))
+	apiIntf, err := factory.Build(&TestApi{}, cake.WithBaseURL("https://{id}.mockapi.io/api/v1"))
 	if err != nil {
 		panic(err)
 	}
@@ -70,4 +70,21 @@ type TestApi struct {
 }
 ```
 
-For more use cases, see [example](./example/main.go)
+For more, see [example](./example/main.go)
+
+### Performance
+
+Ran `GOMAXPROCS=1 go test -bench=. -benchtime=5s -benchmem` on a Macbook Pro 2017 i5 version with go1.16.7:
+
+```
+goos: darwin
+goarch: amd64
+pkg: github.com/snownd/cake
+cpu: Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
+BenchmarkHTTPClientGet     89977             64077 ns/op            6335 B/op         76 allocs/op
+BenchmarkCakeGet           79471             69677 ns/op            7269 B/op         93 allocs/op
+PASS
+ok      github.com/snownd/cake  13.366s
+```
+
+There is a bit of performance impacts because of uses of reflect. Still, it should be fast enough for most cases.

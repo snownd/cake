@@ -103,11 +103,11 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 			panic(err)
 		}
 		res, err := opts.client.Do(req)
-		if err != nil {
-			// TODO
-			panic(err)
-		}
 		results := make([]reflect.Value, 0, funcType.NumOut())
+		if err != nil {
+			makeResponse(funcType, "", &results, nil, err)
+			return results
+		}
 		defer res.Body.Close()
 		if funcType.NumOut() == 0 {
 			return results

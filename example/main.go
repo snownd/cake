@@ -31,7 +31,8 @@ type UserListRequestConfig struct {
 
 type UserCreateRequestConfig struct {
 	cake.RequestConfig
-	Data *User `body:""`
+	// default content-type = application/json when use body tag like `body:""`
+	Data *User `body:"application/json"`
 }
 
 type TestApi struct {

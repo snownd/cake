@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/snownd/cake"
@@ -45,7 +44,7 @@ type TestApi struct {
 
 func main() {
 
-	factory := cake.NewFactoryWithClient(http.DefaultClient)
+	factory := cake.New()
 	// click https://mockapi.io/clone/61567ea3e039a0001725aa19 to create a mockapi project
 	apiIntf, err := factory.Build(&TestApi{}, cake.WithBaseURL("https://{id}.mockapi.io/api/v1"))
 	if err != nil {

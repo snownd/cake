@@ -16,8 +16,9 @@ type Factory struct {
 }
 
 type buildOptions struct {
-	baseUrl string
-	client  *http.Client
+	baseUrl  string
+	client   *http.Client
+	encoders map[string]BodyEncoder
 }
 
 type BuildOption func(opt *buildOptions)
@@ -25,6 +26,12 @@ type BuildOption func(opt *buildOptions)
 func WithBaseURL(url string) BuildOption {
 	return func(opt *buildOptions) {
 		opt.baseUrl = url
+	}
+}
+
+func WithEncoder(contentType string, encoder BodyEncoder) BuildOption {
+	return func(opt *buildOptions) {
+		opt.encoders[contentType] = encoder
 	}
 }
 
@@ -50,6 +57,10 @@ func (f *Factory) Build(target interface{}, opts ...BuildOption) (interface{}, e
 	}
 	bopts := &buildOptions{
 		client: f.client,
+		encoders: map[string]BodyEncoder{
+			ContentTypeJson: jsonEncoder,
+			contentTypeText: textEncoder,
+		},
 	}
 	for _, apply := range opts {
 		apply(bopts)

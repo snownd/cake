@@ -1,7 +1,6 @@
 package cake
 
 import (
-	"bytes"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -10,7 +9,7 @@ import (
 
 type requestConfigFieldBuilder func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error
 
-func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string) argBuilder {
+func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string, opts *buildOptions) argBuilder {
 	urlLayers := strings.Split(url, "/")
 	urlParams := make(map[string]int)
 	for i, l := range urlLayers {
@@ -74,20 +73,29 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string)
 					return nil
 				}
 			case APIFuncArgTagBody:
+				// todo tagValue as content-type
 				kind := fieldType.Type.Kind()
+				ct := tagValue
+				if ct == "" {
+					ct = ContentTypeJson
+				}
 				if kind == reflect.Struct ||
 					(kind == reflect.Ptr && fieldType.Type.Elem().Kind() == reflect.Struct) ||
 					kind == reflect.Map ||
 					kind == reflect.Slice ||
 					kind == reflect.Array {
 					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
-						body, err := json.Marshal(field.Interface())
+						encoder, ok := opts.encoders[ct]
+						if !ok {
+							encoder = jsonEncoder
+						}
+						l, body, err := encoder.EncodeBody(field.Interface())
 						if err != nil {
 							return err
 						}
-						req.body = bytes.NewBuffer(body)
-						req.header.Set(HeaderContentType, ContentTypeJson)
-						req.header.Set(HeaderContentLength, strconv.Itoa(len(body)))
+						req.body = body
+						req.header.Set(HeaderContentType, ct)
+						req.header.Set(HeaderContentLength, strconv.Itoa(l))
 						return nil
 					}
 				}

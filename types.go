@@ -20,7 +20,7 @@ type RequestConfig struct{ cakeConfigSentinel }
 
 type BodyEncoder interface {
 	ContentType() string
-	EncodeBody(body interface{}) (io.Reader, error)
+	EncodeBody(body interface{}) (int, io.Reader, error)
 }
 
 type TagMap = map[string]string

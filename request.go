@@ -58,12 +58,12 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 			})
 		case reflect.Struct:
 			if IsRequestConfig(argType) {
-				ab := makeArgBuilderForRequestConfigCached(argType, index, apiDefTagMap[TagURL])
+				ab := makeArgBuilderForRequestConfigCached(argType, index, apiDefTagMap[TagURL], opts)
 				builders = append(builders, ab)
 			}
 		case reflect.Ptr:
 			if IsRequestConfig(argType.Elem()) {
-				ab := makeArgBuilderForRequestConfigCached(argType, index, apiDefTagMap[TagURL])
+				ab := makeArgBuilderForRequestConfigCached(argType, index, apiDefTagMap[TagURL], opts)
 				builders = append(builders, ab)
 			}
 		default:

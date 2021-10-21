@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"reflect"
 	"sync"
-	"time"
 )
 
 const Version = "0.1.0"
@@ -18,7 +17,6 @@ type Factory struct {
 
 type buildOptions struct {
 	baseUrl string
-	timeout time.Duration
 	client  *http.Client
 }
 
@@ -51,8 +49,7 @@ func (f *Factory) Build(target interface{}, opts ...BuildOption) (interface{}, e
 		return nil, ErrInvalidBuildTarget
 	}
 	bopts := &buildOptions{
-		timeout: 5 * time.Second,
-		client:  f.client,
+		client: f.client,
 	}
 	for _, apply := range opts {
 		apply(bopts)

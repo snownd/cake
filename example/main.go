@@ -9,6 +9,8 @@ import (
 	"github.com/snownd/cake"
 )
 
+const mockAPIID = ""
+
 type User struct {
 	ID        string    `json:"id"`
 	Phone     string    `json:"phone"`
@@ -47,7 +49,7 @@ func main() {
 
 	factory := cake.New()
 	// click https://mockapi.io/clone/61567ea3e039a0001725aa19 to create a mockapi project
-	apiIntf, err := factory.Build(&TestApi{}, cake.WithBaseURL("https://{id}.mockapi.io/api/v1"))
+	apiIntf, err := factory.Build(&TestApi{}, cake.WithBaseURL("https://"+mockAPIID+".mockapi.io/api/v1"))
 	if err != nil {
 		panic(err)
 	}
@@ -81,6 +83,18 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("delete user", dUser)
+	_, err = api.User(context.Background(), &UserRequestConfig{
+		ID: newUser.ID,
+	})
+	if err != nil {
+		var rErr cake.RequestError
+		if errors.As(err, &rErr) {
+			fmt.Println("expect 404, got:", rErr.StatusCode())
+		} else {
+			panic(err)
+		}
+	}
+
 	users, err := api.Users(context.Background(), &UserListRequestConfig{
 		Limit: 10,
 		Page:  1,

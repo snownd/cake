@@ -59,3 +59,5 @@ var ErrInvalidRequestFunction = errors.New("cake: invalid request function")
 var ErrUnexpectedResponseContentType = errors.New("cake: unexpected resposne Content-Type")
 
 var ErrInvalidBody = errors.New("cake: invalid body")
+
+var ErrRequestFailed = errors.New("cake: request failed")

@@ -130,6 +130,10 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		default:
 			body, err = io.ReadAll(res.Body)
 		}
+		if res.StatusCode/100 != 2 {
+			makeResponse(funcType, "", &results, nil, NewRequestError(req, res))
+			return results
+		}
 		makeResponse(funcType, res.Header.Get(HeaderContentType), &results, body, err)
 		return results
 	}), nil

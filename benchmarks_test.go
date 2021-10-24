@@ -1,6 +1,7 @@
 package cake_test
 
 import (
+	"bytes"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +14,7 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-type TestRes struct {
+type TestData struct {
 	Foo string   `json:"foo"`
 	Bar []string `json:"bar"`
 }
@@ -24,8 +25,14 @@ type TestGetRequest struct {
 	QueryFoo int    `query:"foo"`
 }
 
+type TestPostRequest struct {
+	cake.RequestConfig
+	Data *TestData `body:"application/json"`
+}
+
 type TestCakeFoo struct {
-	GetData func(*TestGetRequest) (*TestRes, error) `url:"/data/:id"`
+	GetData  func(*TestGetRequest) (*TestData, error)  `url:"/data/:id"`
+	PostData func(*TestPostRequest) (*TestData, error) `method:"POST" url:"/data"`
 }
 
 var msg = []byte(`{"foo":"bar", "bar":["foo1", "foo2"]}`)
@@ -57,10 +64,12 @@ func BenchmarkHTTPClientGet(b *testing.B) {
 		if e != nil {
 			b.Fatal("ReadAll:", e)
 		}
-		data := &TestRes{}
-		json.Unmarshal(body, data)
+		data := &TestData{}
+		if e = json.Unmarshal(body, data); e != nil {
+			b.Fatal("JsonUnmarshal", e)
+		}
 		if len(data.Bar) == 0 {
-			b.Fatal("json:", string(body))
+			b.Fatal("Json:", string(body))
 		}
 	}
 }
@@ -94,6 +103,88 @@ func BenchmarkCakeGet(b *testing.B) {
 		}
 		if len(r.Bar) == 0 {
 			b.Fatal("CakeJson:", r)
+		}
+	}
+}
+
+func BenchmarkHTTPClientPost(b *testing.B) {
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		data, err := io.ReadAll(r.Body)
+		if err != nil {
+			b.Fatal("ReadBody:", err)
+		}
+		rw.Header().Add("Content-Type", "application/json")
+		rw.Write(data)
+	}))
+	defer ts.Close()
+
+	tr := &http.Transport{}
+	defer tr.CloseIdleConnections()
+	cl := &http.Client{
+		Transport: tr,
+	}
+
+	b.ResetTimer()
+
+	for i := 0; i < b.N; i++ {
+		reqData := &TestData{
+			Foo: strconv.Itoa(i),
+			Bar: make([]string, 2),
+		}
+		reqBody, _ := json.Marshal(reqData)
+		res, err := cl.Post(ts.URL+"/data", "application/json", bytes.NewBuffer(reqBody))
+		if err != nil {
+			b.Fatal("Post:", err)
+		}
+		body, e := io.ReadAll(res.Body)
+		if e != nil {
+			b.Fatal("ReadAll:", e)
+		}
+		data := &TestData{}
+		if e = json.Unmarshal(body, data); e != nil {
+			b.Fatal("JsonUnmarshal", e)
+		}
+		if data.Foo != reqData.Foo {
+			b.Fatal("ResponseJson:", string(body))
+		}
+	}
+}
+
+func BenchmarkCakePost(b *testing.B) {
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		data, err := io.ReadAll(r.Body)
+		if err != nil {
+			b.Fatal("ReadBody:", err)
+		}
+		rw.Header().Add("Content-Type", "application/json")
+		rw.Write(data)
+	}))
+	defer ts.Close()
+
+	tr := &http.Transport{}
+	defer tr.CloseIdleConnections()
+	hc := &http.Client{
+		Transport: tr,
+	}
+	t, err := cake.NewFactoryWithClient(hc).Build(&TestCakeFoo{}, cake.WithBaseURL(ts.URL))
+	if err != nil {
+		b.Fatal("CakeBuild:", err)
+	}
+	c := t.(*TestCakeFoo)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		data := &TestData{
+			Foo: strconv.Itoa(i),
+			Bar: make([]string, 2),
+		}
+		r, e := c.PostData(&TestPostRequest{
+			Data: data,
+		})
+		if e != nil {
+			b.Fatal("CakeGet", e)
+		}
+		if data.Foo != r.Foo {
+			b.Fatal("ResponseJson:", r)
 		}
 	}
 }

@@ -1,6 +1,6 @@
 ## Cake
 
-Cake is a lightweight HTTP client library for GO, inspired by Java [Open-Feign](https://github.com/OpenFeign/feign).
+Cake is a lightweight HTTP client library for GO, inspired by java [feign](https://github.com/OpenFeign/feign).
 
 
 ### Installation
@@ -61,7 +61,7 @@ func main() {
 ```go
 type UserCreateRequestConfig struct {
 	cake.RequestConfig
-  Data *User `body:""`
+  Data *User `body:"application-json"`
 }
 
 type TestApi struct {
@@ -81,10 +81,14 @@ goos: darwin
 goarch: amd64
 pkg: github.com/snownd/cake
 cpu: Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
-BenchmarkHTTPClientGet     89977             64077 ns/op            6335 B/op         76 allocs/op
-BenchmarkCakeGet           79471             69677 ns/op            7269 B/op         93 allocs/op
+BenchmarkHTTPClientGet             79760             74347 ns/op            6334 B/op         76 allocs/op
+BenchmarkCakeGet                   72801             81319 ns/op            7269 B/op         93 allocs/op
+BenchmarkHTTPClientPost            72429             82820 ns/op            7796 B/op         91 allocs/op
+BenchmarkCakePost                  69199             86652 ns/op            8282 B/op        103 allocs/op
 PASS
-ok      github.com/snownd/cake  13.366s
+ok      github.com/snownd/cake  27.511s
+
+For Get request, there are 5 out of 17 allocs simply caused by extra headers like Accept, Accept-Encoding and User-Agent.
 ```
 
 There is a bit of performance impacts because of uses of reflect. Still, it should be fast enough for most cases.

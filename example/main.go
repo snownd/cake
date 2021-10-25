@@ -48,6 +48,7 @@ type TestApi struct {
 func main() {
 
 	factory := cake.New()
+	defer factory.Close()
 	// click https://mockapi.io/clone/61567ea3e039a0001725aa19 to create a mockapi project
 	apiIntf, err := factory.Build(&TestApi{}, cake.WithBaseURL("https://"+mockAPIID+".mockapi.io/api/v1"))
 	if err != nil {

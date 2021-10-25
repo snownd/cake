@@ -75,6 +75,9 @@ func (f *Factory) Build(target interface{}, opts ...BuildOption) (interface{}, e
 		return nil, ErrInvalidBuildTarget
 	}
 }
+func (f *Factory) Close() {
+	f.client.CloseIdleConnections()
+}
 
 func (f *Factory) build(target reflect.Type, opts *buildOptions) (interface{}, error) {
 	v := reflect.New(target)

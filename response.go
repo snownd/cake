@@ -3,6 +3,7 @@ package cake
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 
 	jsoniter "github.com/json-iterator/go"
@@ -41,7 +42,7 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 		t := funcType.Out(i)
 		switch t.Kind() {
 		case reflect.Ptr:
-			if contentType == ContentTypeJson {
+			if strings.HasPrefix(contentType, ContentTypeJson) {
 				builder := func(b []byte, e error) reflect.Value {
 					if e != nil || len(b) == 0 {
 						return reflect.Zero(t)

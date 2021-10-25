@@ -83,7 +83,8 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string,
 					(kind == reflect.Ptr && fieldType.Type.Elem().Kind() == reflect.Struct) ||
 					kind == reflect.Map ||
 					kind == reflect.Slice ||
-					kind == reflect.Array {
+					kind == reflect.Array ||
+					kind == reflect.String {
 					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 						encoder, ok := opts.encoders[ct]
 						if !ok {

@@ -54,10 +54,10 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string,
 					}
 					if headers.Kind() == reflect.Struct {
 						for h := 0; h < headers.NumField(); h++ {
-							header := headers.Field(i)
-							key, ok := fieldType.Type.Field(i).Tag.Lookup(APIFuncArgTagHeader)
+							header := headers.Field(h)
+							key, ok := headers.Type().Field(h).Tag.Lookup(APIFuncArgTagHeader)
 							if !ok {
-								key = fieldType.Name
+								key = header.Type().Name()
 							}
 							req.header.Set(key, header.String())
 						}

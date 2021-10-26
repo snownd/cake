@@ -73,11 +73,10 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string,
 					return nil
 				}
 			case APIFuncArgTagBody:
-				// todo tagValue as content-type
 				kind := fieldType.Type.Kind()
 				ct := tagValue
 				if ct == "" {
-					ct = ContentTypeJson
+					ct = contentTypeText
 				}
 				if kind == reflect.Struct ||
 					(kind == reflect.Ptr && fieldType.Type.Elem().Kind() == reflect.Struct) ||
@@ -88,7 +87,7 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string,
 					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
 						encoder, ok := opts.encoders[ct]
 						if !ok {
-							encoder = jsonEncoder
+							encoder = textEncoder
 						}
 						l, body, err := encoder.EncodeBody(field.Interface())
 						if err != nil {

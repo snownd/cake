@@ -41,34 +41,45 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 	} else {
 		method = MethodGet
 	}
-	for i := 0; i < funcType.NumIn(); i++ {
-		index := i
-		argType := funcType.In(i)
-		switch argType.Kind() {
-		case reflect.Interface:
-			if !IsContext(argType) {
-				err := fmt.Errorf("%w, only accept context interface, function %v", ErrInvalidRequestFunction, funcType)
+	url, ok := apiDefTagMap[TagURL]
+	if !ok {
+		return _emptyValue, fmt.Errorf("%w with no url tag", ErrInvalidRequestFunction)
+	}
+	if funcType.NumIn() == 0 {
+		builders = append(builders, func(args []reflect.Value, req *requestTemplate) error {
+			req.url = req.url + url
+			return nil
+		})
+	} else {
+		for i := 0; i < funcType.NumIn(); i++ {
+			index := i
+			argType := funcType.In(i)
+			switch argType.Kind() {
+			case reflect.Interface:
+				if !IsContext(argType) {
+					err := fmt.Errorf("%w, only accept context interface, function %v", ErrInvalidRequestFunction, funcType)
+					return _emptyValue, err
+				}
+				builders = append(builders, func(args []reflect.Value, req *requestTemplate) error {
+					// todo
+					ctx := args[index].Interface().(context.Context)
+					req.ctx = ctx
+					return nil
+				})
+			case reflect.Struct:
+				if IsRequestConfig(argType) {
+					ab := makeArgBuilderForRequestConfigCached(argType, index, url, opts)
+					builders = append(builders, ab)
+				}
+			case reflect.Ptr:
+				if IsRequestConfig(argType.Elem()) {
+					ab := makeArgBuilderForRequestConfigCached(argType, index, url, opts)
+					builders = append(builders, ab)
+				}
+			default:
+				err := fmt.Errorf("%w, arg types must be one of: %s,%s or %s", ErrInvalidRequestFunction, reflect.Interface, reflect.Struct, reflect.Ptr)
 				return _emptyValue, err
 			}
-			builders = append(builders, func(args []reflect.Value, req *requestTemplate) error {
-				// todo
-				ctx := args[index].Interface().(context.Context)
-				req.ctx = ctx
-				return nil
-			})
-		case reflect.Struct:
-			if IsRequestConfig(argType) {
-				ab := makeArgBuilderForRequestConfigCached(argType, index, apiDefTagMap[TagURL], opts)
-				builders = append(builders, ab)
-			}
-		case reflect.Ptr:
-			if IsRequestConfig(argType.Elem()) {
-				ab := makeArgBuilderForRequestConfigCached(argType, index, apiDefTagMap[TagURL], opts)
-				builders = append(builders, ab)
-			}
-		default:
-			err := fmt.Errorf("%w, arg types must be one of: %s,%s or %s", ErrInvalidRequestFunction, reflect.Interface, reflect.Struct, reflect.Ptr)
-			return _emptyValue, err
 		}
 	}
 	newRequest := newRequestTemplate

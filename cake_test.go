@@ -1,6 +1,7 @@
 package cake_test
 
 import (
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -117,6 +118,139 @@ func TestConfigHeader(t *testing.T) {
 		r, err := c.SimpleGet(&config{Name: name})
 		if assert.NoError(t, err) {
 			assert.Equal(t, r, "OK")
+		}
+	}
+}
+
+func TestFuncHeader(t *testing.T) {
+	path := "/foo"
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, path, r.URL.Path)
+		assert.Equal(t, "cake", r.Header.Get("x-app-name"))
+		rw.Header().Set("Content-Type", "text/plain")
+		rw.Write([]byte("OK"))
+	}))
+	defer ts.Close()
+
+	type client struct {
+		SimpleGet func() (string, error) `url:"/foo" headers:"X-App-Name=cake"`
+	}
+	f := cake.New()
+	defer f.Close()
+	ci, err := f.Build(&client{}, cake.WithBaseURL(ts.URL))
+	if !assert.NoError(t, err) {
+		return
+	}
+	if c, ok := ci.(*client); assert.True(t, ok) {
+		r, err := c.SimpleGet()
+		if assert.NoError(t, err) {
+			assert.Equal(t, r, "OK")
+		}
+	}
+}
+
+func TestRequestStructHeaders(t *testing.T) {
+	name := "cake"
+	path := "/foo"
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, path, r.URL.Path)
+		assert.Equal(t, name, r.Header.Get("x-app-name"))
+		rw.Header().Set("Content-Type", "text/plain")
+		rw.Write([]byte("OK"))
+	}))
+	defer ts.Close()
+	type headers struct {
+		Name string `header:"X-App-Name"`
+	}
+	type config struct {
+		cake.RequestConfig
+		Headers *headers `headers:""`
+	}
+
+	type client struct {
+		SimpleGet func(*config) (string, error) `url:"/foo"`
+	}
+	f := cake.New()
+	defer f.Close()
+	ci, err := f.Build(&client{}, cake.WithBaseURL(ts.URL))
+	if !assert.NoError(t, err) {
+		return
+	}
+	if c, ok := ci.(*client); assert.True(t, ok) {
+		r, err := c.SimpleGet(&config{Headers: &headers{Name: name}})
+		if assert.NoError(t, err) {
+			assert.Equal(t, r, "OK")
+		}
+	}
+}
+
+func TestRequestMapHeaders(t *testing.T) {
+	name := "cake"
+	path := "/foo"
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, path, r.URL.Path)
+		assert.Equal(t, name, r.Header.Get("x-app-name"))
+		rw.Header().Set("Content-Type", "text/plain")
+		rw.Write([]byte("OK"))
+	}))
+	defer ts.Close()
+
+	type config struct {
+		cake.RequestConfig
+		Headers map[string]string `headers:""`
+	}
+
+	type client struct {
+		SimpleGet func(*config) (string, error) `url:"/foo"`
+	}
+	f := cake.New()
+	defer f.Close()
+	ci, err := f.Build(&client{}, cake.WithBaseURL(ts.URL))
+	if !assert.NoError(t, err) {
+		return
+	}
+	if c, ok := ci.(*client); assert.True(t, ok) {
+		r, err := c.SimpleGet(&config{Headers: map[string]string{"X-App-Name": name}})
+		if assert.NoError(t, err) {
+			assert.Equal(t, r, "OK")
+		}
+	}
+}
+
+func TestPostRequestWithBody(t *testing.T) {
+	path := "/foo"
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, path, r.URL.Path)
+		rw.Header().Set("Content-Type", "application/json;charset=utf-8")
+		data, err := io.ReadAll(r.Body)
+		assert.NoError(t, err)
+		rw.Write(data)
+	}))
+	defer ts.Close()
+
+	type testBody struct {
+		Foo string
+		Bar int
+	}
+
+	type config struct {
+		cake.RequestConfig
+		Data testBody `body:"application/json"`
+	}
+
+	type client struct {
+		PostWithBody func(*config) (*testBody, error) `method:"POST" url:"/foo"`
+	}
+	f := cake.New()
+	defer f.Close()
+	ci, err := f.Build(&client{}, cake.WithBaseURL(ts.URL))
+	if !assert.NoError(t, err) {
+		return
+	}
+	if c, ok := ci.(*client); assert.True(t, ok) {
+		r, err := c.PostWithBody(&config{Data: testBody{Foo: "bar", Bar: 1}})
+		if assert.NoError(t, err) {
+			assert.Equal(t, r.Foo, "bar")
 		}
 	}
 }

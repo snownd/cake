@@ -60,12 +60,21 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 					err := fmt.Errorf("%w, only accept context interface, function %v", ErrInvalidRequestFunction, funcType)
 					return _emptyValue, err
 				}
-				builders = append(builders, func(args []reflect.Value, req *requestTemplate) error {
-					// todo
-					ctx := args[index].Interface().(context.Context)
-					req.ctx = ctx
-					return nil
-				})
+				if funcType.NumIn() == 1 {
+					builders = append(builders, func(args []reflect.Value, req *requestTemplate) error {
+						req.url = req.url + url
+						ctx := args[index].Interface().(context.Context)
+						req.ctx = ctx
+						return nil
+					})
+				} else {
+					builders = append(builders, func(args []reflect.Value, req *requestTemplate) error {
+						ctx := args[index].Interface().(context.Context)
+						req.ctx = ctx
+						return nil
+					})
+				}
+
 			case reflect.Struct:
 				if IsRequestConfig(argType) {
 					ab := makeArgBuilderForRequestConfigCached(argType, index, url, opts)

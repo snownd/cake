@@ -7,11 +7,11 @@ import (
 
 const (
 	ContentTypeJson = "application/json"
-	contentTypeText = "text/plain"
+	ContentTypeText = "text/plain"
 )
 
 var UserAgent = []string{"cake/" + Version}
-var Accept = []string{ContentTypeJson, contentTypeText}
+var Accept = []string{ContentTypeJson, ContentTypeText}
 var AcceptEncoding = []string{"gzip", "deflate"}
 
 const (

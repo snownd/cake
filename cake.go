@@ -59,7 +59,7 @@ func (f *Factory) Build(target interface{}, opts ...BuildOption) (interface{}, e
 		client: f.client,
 		encoders: map[string]BodyEncoder{
 			ContentTypeJson: jsonEncoder,
-			contentTypeText: textEncoder,
+			ContentTypeText: textEncoder,
 		},
 	}
 	for _, apply := range opts {

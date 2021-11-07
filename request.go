@@ -122,8 +122,15 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		if err != nil {
 			panic(err)
 		}
-		res, err := opts.client.Do(req)
 		results := make([]reflect.Value, 0, funcType.NumOut())
+		for _, f := range opts.requestMws {
+			err = f(req)
+			if err != nil {
+				makeResponse(funcType, "", &results, nil, err)
+				return results
+			}
+		}
+		res, err := opts.client.Do(req)
 		if err != nil {
 			makeResponse(funcType, "", &results, nil, err)
 			return results

@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+type RequestMiddleware func(*http.Request) error
+
 type cakeConfigSentinel interface {
 	cakeConfigSentinel()
 }

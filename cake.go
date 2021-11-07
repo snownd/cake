@@ -16,9 +16,10 @@ type Factory struct {
 }
 
 type buildOptions struct {
-	baseUrl  string
-	client   *http.Client
-	encoders map[string]BodyEncoder
+	baseUrl    string
+	client     *http.Client
+	encoders   map[string]BodyEncoder
+	requestMws []RequestMiddleware
 }
 
 type BuildOption func(opt *buildOptions)
@@ -32,6 +33,13 @@ func WithBaseURL(url string) BuildOption {
 func WithEncoder(contentType string, encoder BodyEncoder) BuildOption {
 	return func(opt *buildOptions) {
 		opt.encoders[contentType] = encoder
+	}
+}
+
+// WithRequestMiddleware can be called multiple times
+func WithRequestMiddleware(mw RequestMiddleware) BuildOption {
+	return func(opt *buildOptions) {
+		opt.requestMws = append(opt.requestMws, mw)
 	}
 }
 

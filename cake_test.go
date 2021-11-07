@@ -1,6 +1,7 @@
 package cake_test
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -10,6 +11,37 @@ import (
 	"github.com/snownd/cake"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestRequestMiddleware(t *testing.T) {
+	path := "/foo/bar"
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, path, r.URL.Path)
+		rw.Header().Set("Content-Type", "text/plain")
+		rw.Write([]byte("OK"))
+	}))
+	defer ts.Close()
+
+	type client struct {
+		SimpleGet func(context.Context) (string, error) `url:"/foo/bar"`
+	}
+	f := cake.New()
+	defer f.Close()
+	mwPath := ""
+	ci, err := f.Build(&client{}, cake.WithBaseURL(ts.URL), cake.WithRequestMiddleware(func(r *http.Request) error {
+		mwPath = r.URL.Path
+		return nil
+	}))
+	if !assert.NoError(t, err) {
+		return
+	}
+	if c, ok := ci.(*client); assert.True(t, ok) {
+		r, err := c.SimpleGet(context.Background())
+		if assert.NoError(t, err) {
+			assert.Equal(t, "OK", r)
+			assert.Equal(t, path, mwPath)
+		}
+	}
+}
 
 func TestGetWithPathParam(t *testing.T) {
 	name := "cake"

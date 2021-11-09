@@ -7,7 +7,7 @@ Cake is a lightweight HTTP client library for GO, inspired by java [feign](https
 
 ```bash
 # With Go Modules, recommanded with go version > 1.16
-require github.com/snownd/cake
+go get github.com/snownd/cake
 ```
 
 ### Usage

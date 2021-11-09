@@ -139,27 +139,27 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		if funcType.NumOut() == 0 {
 			return results
 		}
-		var body []byte
+		if res.StatusCode/100 != 2 {
+			makeResponse(funcType, "", &results, nil, NewRequestError(req, res))
+			return results
+		}
+		var body io.Reader
 		// fmt.Println(res.Header.Get(HeaderContentEncoding))
 		switch res.Header.Get(HeaderContentEncoding) {
 		case "gzip", "x-gzip":
 			reader, e := gzip.NewReader(res.Body)
 			defer reader.Close()
 			if e == nil {
-				body, err = io.ReadAll(reader)
+				body = reader
 			} else {
 				err = e
 			}
 		case "deflate":
 			reader := flate.NewReader(res.Body)
 			defer reader.Close()
-			body, err = io.ReadAll(reader)
+			body = reader
 		default:
-			body, err = io.ReadAll(res.Body)
-		}
-		if res.StatusCode/100 != 2 {
-			makeResponse(funcType, "", &results, nil, NewRequestError(req, res))
-			return results
+			body = res.Body
 		}
 		makeResponse(funcType, res.Header.Get(HeaderContentType), &results, body, err)
 		return results

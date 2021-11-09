@@ -10,9 +10,9 @@ import (
 const Version = "0.1.1"
 
 type Factory struct {
-	lock *sync.RWMutex
-	// cache  map[int]interface{}
-	client *http.Client
+	lock               *sync.RWMutex
+	globalBuildOptions []BuildOption
+	client             *http.Client
 }
 
 type buildOptions struct {
@@ -43,18 +43,18 @@ func WithRequestMiddleware(mw RequestMiddleware) BuildOption {
 	}
 }
 
-func New() *Factory {
+func New(opts ...BuildOption) *Factory {
 	client := &http.Client{
 		Transport: createTransport(),
 	}
-	return NewFactoryWithClient(client)
+	return NewFactoryWithClient(client, opts...)
 }
 
-func NewFactoryWithClient(client *http.Client) *Factory {
+func NewFactoryWithClient(client *http.Client, opts ...BuildOption) *Factory {
 	f := &Factory{
-		lock: &sync.RWMutex{},
-		// cache:  map[int]interface{}{},
-		client: client,
+		lock:               &sync.RWMutex{},
+		globalBuildOptions: opts,
+		client:             client,
 	}
 	return f
 }
@@ -69,6 +69,9 @@ func (f *Factory) Build(target interface{}, opts ...BuildOption) (interface{}, e
 			ContentTypeJson: jsonEncoder,
 			ContentTypeText: textEncoder,
 		},
+	}
+	for _, apply := range f.globalBuildOptions {
+		apply(bopts)
 	}
 	for _, apply := range opts {
 		apply(bopts)

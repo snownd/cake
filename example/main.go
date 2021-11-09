@@ -34,6 +34,7 @@ type UserListRequestConfig struct {
 type UserCreateRequestConfig struct {
 	cake.RequestConfig
 	// default content-type = text/plain when use body tag like `body:""`
+	// use cake.WithDefaultContenType("application/json") can change it
 	Data *User `body:"application/json"`
 }
 

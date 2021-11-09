@@ -16,10 +16,11 @@ type Factory struct {
 }
 
 type buildOptions struct {
-	baseUrl    string
-	client     *http.Client
-	encoders   map[string]BodyEncoder
-	requestMws []RequestMiddleware
+	baseUrl     string
+	client      *http.Client
+	encoders    map[string]BodyEncoder
+	requestMws  []RequestMiddleware
+	contentType string
 }
 
 type BuildOption func(opt *buildOptions)
@@ -40,6 +41,12 @@ func WithEncoder(contentType string, encoder BodyEncoder) BuildOption {
 func WithRequestMiddleware(mw RequestMiddleware) BuildOption {
 	return func(opt *buildOptions) {
 		opt.requestMws = append(opt.requestMws, mw)
+	}
+}
+
+func WithDefaultContenType(ct string) BuildOption {
+	return func(opt *buildOptions) {
+		opt.contentType = ct
 	}
 }
 
@@ -64,7 +71,8 @@ func (f *Factory) Build(target interface{}, opts ...BuildOption) (interface{}, e
 		return nil, ErrInvalidBuildTarget
 	}
 	bopts := &buildOptions{
-		client: f.client,
+		client:      f.client,
+		contentType: ContentTypeText,
 		encoders: map[string]BodyEncoder{
 			ContentTypeJson: jsonEncoder,
 			ContentTypeText: textEncoder,

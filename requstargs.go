@@ -76,7 +76,7 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string,
 				kind := fieldType.Type.Kind()
 				ct := tagValue
 				if ct == "" {
-					ct = ContentTypeText
+					ct = opts.contentType
 				}
 				if kind == reflect.Struct ||
 					(kind == reflect.Ptr && fieldType.Type.Elem().Kind() == reflect.Struct) ||

@@ -81,14 +81,14 @@ goos: darwin
 goarch: amd64
 pkg: github.com/snownd/cake
 cpu: Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
-BenchmarkHTTPClientGet             79760             74347 ns/op            6334 B/op         76 allocs/op
-BenchmarkCakeGet                   72801             81319 ns/op            7269 B/op         93 allocs/op
-BenchmarkHTTPClientPost            72429             82820 ns/op            7796 B/op         91 allocs/op
-BenchmarkCakePost                  69199             86652 ns/op            8282 B/op        103 allocs/op
+BenchmarkHTTPClientGet             99350             57686 ns/op            6335 B/op         76 allocs/op
+BenchmarkCakeGet                   93720             61451 ns/op            7421 B/op         95 allocs/op
+BenchmarkHTTPClientPost            94305             61676 ns/op            7796 B/op         91 allocs/op
+BenchmarkCakePost                  86124             66718 ns/op            8433 B/op        105 allocs/op
 PASS
-ok      github.com/snownd/cake  27.511s
+ok      github.com/snownd/cake  26.251s
 
-For Get request, there are 5 out of 17 allocs simply caused by extra headers like Accept, Accept-Encoding and User-Agent.
+For Get request, there are 5 out of 19 allocs simply caused by extra headers like Accept, Accept-Encoding and User-Agent.
 ```
 
 There is a bit of performance impacts because of uses of reflect. Still, it should be fast enough for most cases.

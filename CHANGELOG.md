@@ -1,3 +1,18 @@
+# [0.2.0](https://github.com/snownd/cake/compare/v0.1.2...v0.2.0) (2021-11-09)
+
+
+### Bug Fixes
+
+* **example:** body default ([fcaa2c6](https://github.com/snownd/cake/commit/fcaa2c600449b92aae8a97971054f52996538ab7))
+
+
+### Features
+
+* **cake:** add globalBuildOptions ([998022e](https://github.com/snownd/cake/commit/998022e086b143ab9c2623085a1df37702fb6b05))
+* **request** RequestMiddleware ([e0bf1e6](https://github.com/snownd/cake/commit/e0bf1e6a647b77431c73065b8fb6a4f1b6bf265e))
+
+
+
 ## [0.1.2](https://github.com/snownd/cake/compare/v0.1.1...v0.1.2) (2021-11-04)
 
 

@@ -2,6 +2,7 @@ package cake
 
 import (
 	"fmt"
+	urlUtils "net/url"
 	"reflect"
 	"strconv"
 	"strings"
@@ -105,7 +106,7 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string,
 				switch kind {
 				case reflect.String:
 					builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
-						*querys = append(*querys, key+"="+field.String())
+						*querys = append(*querys, key+"="+urlUtils.QueryEscape(field.String()))
 						return nil
 					}
 				case reflect.Bool:
@@ -157,7 +158,6 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string,
 			req.url = req.url + url
 		}
 		if len(querys) > 0 {
-			// TODO escape
 			req.url = req.url + "?" + strings.Join(querys, "&")
 		}
 

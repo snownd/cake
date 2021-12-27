@@ -1,3 +1,18 @@
+# [0.3.0](https://github.com/snownd/cake/compare/v0.2.0...v) (2021-12-27)
+
+
+### Bug Fixes
+
+* **requestargs:** escape string query ([b346f6e](https://github.com/snownd/cake/commit/b346f6e74d3105041208c4c637b2f22c6d42da09))
+
+
+### Features
+
+* **request:** add default content-type option ([232e5e4](https://github.com/snownd/cake/commit/232e5e47cbd447aaa559be8b656fa6d0a13fe04e))
+* **requestargs:** support application/x-www-form-urlencoded RequestConfig tag ([1d185a9](https://github.com/snownd/cake/commit/1d185a9df1c1afaef6d7b616b422cc1516e0adb5))
+
+
+
 # [0.2.0](https://github.com/snownd/cake/compare/v0.1.2...v0.2.0) (2021-11-09)
 
 

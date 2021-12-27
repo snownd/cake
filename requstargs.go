@@ -29,6 +29,33 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string,
 		tagmap := NewTagMap(fieldType.Tag)
 		for tagName, tagValue := range tagmap {
 			switch tagName {
+			case APIFuncArgTagForm:
+				kind := fieldType.Type.Kind()
+				builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
+					headers := field
+					if kind == reflect.Ptr {
+						headers = field.Elem()
+					}
+					if headers.Kind() == reflect.Struct {
+						for h := 0; h < headers.NumField(); h++ {
+							header := headers.Field(h)
+							key, ok := headers.Type().Field(h).Tag.Lookup(APIFuncArgTagHeader)
+							if !ok {
+								key = header.Type().Name()
+							}
+							req.header.Set(key, header.String())
+						}
+					} else if headers.Kind() == reflect.Map {
+						if fieldType.Type.Key().Kind() != reflect.String || fieldType.Type.Elem().Kind() != reflect.String {
+							return fmt.Errorf("%w with tag headers only support map[string]string", ErrInvalidRequestFunction)
+						}
+						iter := headers.MapRange()
+						for iter.Next() {
+							req.header.Set(iter.Key().String(), iter.Value().String())
+						}
+					}
+					return nil
+				}
 			case APIFuncArgTagParam:
 				l, ok := urlParams[tagValue]
 				if ok {

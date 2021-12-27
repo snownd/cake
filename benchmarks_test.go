@@ -71,6 +71,7 @@ func BenchmarkHTTPClientGet(b *testing.B) {
 		if len(data.Bar) == 0 {
 			b.Fatal("Json:", string(body))
 		}
+		res.Body.Close()
 	}
 }
 
@@ -147,6 +148,7 @@ func BenchmarkHTTPClientPost(b *testing.B) {
 		if data.Foo != reqData.Foo {
 			b.Fatal("ResponseJson:", string(body))
 		}
+		res.Body.Close()
 	}
 }
 

@@ -42,6 +42,8 @@ const (
 	APIFuncArgTagHeaders = "headers"
 	APIFuncArgTagBody    = "body"
 	APIFuncArgTagQuery   = "query"
+	// application/x-www-form-urlencoded
+	APIFuncArgTagForm = "form"
 	// todo
 	// APIFuncArgTagQueryString = "queryString"
 )

@@ -31,29 +31,47 @@ func makeArgBuilderForRequestConfigCached(t reflect.Type, index int, url string,
 			switch tagName {
 			case APIFuncArgTagForm:
 				kind := fieldType.Type.Kind()
+				ct := ContentTypeForm
+				if tagValue != "-" && tagValue != "" {
+					ct = tagValue
+				}
 				builders[i] = func(field reflect.Value, req *requestTemplate, layers []string, querys *[]string) error {
-					headers := field
+					form := field
 					if kind == reflect.Ptr {
-						headers = field.Elem()
+						form = field.Elem()
 					}
-					if headers.Kind() == reflect.Struct {
-						for h := 0; h < headers.NumField(); h++ {
-							header := headers.Field(h)
-							key, ok := headers.Type().Field(h).Tag.Lookup(APIFuncArgTagHeader)
+					data := make(urlUtils.Values)
+					req.header[HeaderContentType] = []string{ct}
+					if form.Kind() == reflect.Struct {
+						for h := 0; h < form.NumField(); h++ {
+							row := form.Field(h)
+							key, ok := form.Type().Field(h).Tag.Lookup(APIFuncArgTagForm)
 							if !ok {
-								key = header.Type().Name()
+								key = row.Type().Name()
 							}
-							req.header.Set(key, header.String())
+							switch form.Type().Field(h).Type.Kind() {
+							case reflect.String:
+								data.Set(key, row.String())
+							case reflect.Bool:
+								data.Set(key, strconv.FormatBool(row.Bool()))
+							case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+								data.Set(key, strconv.FormatInt(row.Int(), 10))
+							case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+								data.Set(key, strconv.FormatUint(row.Uint(), 10))
+							case reflect.Float32, reflect.Float64:
+								data.Set(key, strconv.FormatFloat(row.Float(), 'f', -1, 64))
+							}
 						}
-					} else if headers.Kind() == reflect.Map {
+					} else if form.Kind() == reflect.Map {
 						if fieldType.Type.Key().Kind() != reflect.String || fieldType.Type.Elem().Kind() != reflect.String {
-							return fmt.Errorf("%w with tag headers only support map[string]string", ErrInvalidRequestFunction)
+							return fmt.Errorf("%w with tag form only support map[string]string", ErrInvalidRequestFunction)
 						}
-						iter := headers.MapRange()
+						iter := form.MapRange()
 						for iter.Next() {
-							req.header.Set(iter.Key().String(), iter.Value().String())
+							data.Set(iter.Key().String(), iter.Value().String())
 						}
 					}
+					req.body = strings.NewReader(data.Encode())
 					return nil
 				}
 			case APIFuncArgTagParam:

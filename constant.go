@@ -8,6 +8,7 @@ import (
 const (
 	ContentTypeJson = "application/json"
 	ContentTypeText = "text/plain"
+	ContentTypeForm = "application/x-www-form-urlencoded"
 )
 
 var UserAgent = []string{"cake/" + Version}

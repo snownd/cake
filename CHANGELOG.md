@@ -1,3 +1,12 @@
+# [0.3.1](https://github.com/snownd/cake/compare/v0.3.0...v) (2022-01-03)
+
+
+### Bug Fixes
+
+* **request:** make pack form error ([4aa822e](https://github.com/snownd/cake/commit/4aa822ec1d89f238472ea70378971a1a2cf8bd2a))
+
+
+
 # [0.3.0](https://github.com/snownd/cake/compare/v0.2.0...v) (2021-12-27)
 
 

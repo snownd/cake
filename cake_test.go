@@ -3,6 +3,7 @@ package cake_test
 import (
 	"context"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -283,6 +284,81 @@ func TestPostRequestWithBody(t *testing.T) {
 		r, err := c.PostWithBody(&config{Data: testBody{Foo: "bar", Bar: 1}})
 		if assert.NoError(t, err) {
 			assert.Equal(t, r.Foo, "bar")
+		}
+	}
+}
+
+func TestPostRequestWithURLEncodedForm(t *testing.T) {
+	path := "/foo"
+	type testForm struct {
+		Foo string `form:"foo"`
+		Bar int    `form:"bar"`
+	}
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, path, r.URL.Path)
+		rw.Header().Set("Content-Type", "application/json;charset=utf-8")
+		assert.NoError(t, r.ParseForm())
+		f := r.Form.Get("foo")
+		b, err := strconv.Atoi(r.Form.Get("bar"))
+		assert.NoError(t, err)
+		res := testForm{
+			Foo: f,
+			Bar: b,
+		}
+		data, err := json.Marshal(res)
+		assert.NoError(t, err)
+		rw.Write(data)
+	}))
+	defer ts.Close()
+
+	type config struct {
+		cake.RequestConfig
+		Data testForm `form:""`
+	}
+
+	type client struct {
+		PostWithBody func(*config) (*testForm, error) `method:"POST" url:"/foo"`
+	}
+	f := cake.New()
+	defer f.Close()
+	ci, err := f.Build(&client{}, cake.WithBaseURL(ts.URL))
+	if !assert.NoError(t, err) {
+		return
+	}
+	if c, ok := ci.(*client); assert.True(t, ok) {
+		r, err := c.PostWithBody(&config{Data: testForm{Foo: "bar", Bar: 1}})
+		if assert.NoError(t, err) {
+			assert.Equal(t, r.Foo, "bar")
+		}
+	}
+}
+
+func TestResponseErr(t *testing.T) {
+	path := "/foo"
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, path, r.URL.Path)
+		rw.Header().Set("Content-Type", "application/json")
+		rw.Write([]byte(`{"code: 0}`))
+	}))
+	defer ts.Close()
+	type res struct {
+		Code int         `json:"code"`
+		Data interface{} `json:"data"`
+	}
+
+	type client struct {
+		SimpleGet func() (*res, error) `url:"/foo"`
+	}
+	f := cake.New()
+	defer f.Close()
+	ci, err := f.Build(&client{}, cake.WithBaseURL(ts.URL))
+	if !assert.NoError(t, err) {
+		return
+	}
+	if c, ok := ci.(*client); assert.True(t, ok) {
+		_, err := c.SimpleGet()
+		if err == nil {
+			log.Fatal("should have error")
 		}
 	}
 }

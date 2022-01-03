@@ -12,7 +12,7 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-type responseBuilder = func(io.Reader, error) reflect.Value
+type responseBuilder = func(io.Reader, error) (reflect.Value, error)
 
 var responseBuilderCache map[reflect.Type][]responseBuilder = make(map[reflect.Type][]responseBuilder)
 var resMutex *sync.RWMutex = &sync.RWMutex{}
@@ -23,8 +23,11 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 	resMutex.RUnlock()
 	// data, err := io.ReadAll(body)
 	if ok {
+		e := err
 		for _, builder := range cache {
-			*results = append(*results, builder(data, err))
+			var v reflect.Value
+			v, e = builder(data, e)
+			*results = append(*results, v)
 		}
 		return
 	}
@@ -44,82 +47,84 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 		switch t.Kind() {
 		case reflect.Ptr:
 			if strings.HasPrefix(contentType, ContentTypeJson) {
-				builder := func(r io.Reader, e error) reflect.Value {
+				builder := func(r io.Reader, e error) (reflect.Value, error) {
 					if e != nil {
-						return reflect.Zero(t)
+						return reflect.Zero(t), e
 					}
 					value := reflect.New(t.Elem())
 					if e = json.NewDecoder(r).Decode(value.Interface()); e != nil {
-						return reflect.Zero(t)
+						return reflect.Zero(t), e
 					}
-					return value
+					return value, nil
 				}
 				cache = append(cache, builder)
 			} else {
-				cache = append(cache, func(r io.Reader, e error) reflect.Value {
+				cache = append(cache, func(r io.Reader, e error) (reflect.Value, error) {
 					if e != nil {
-						return reflect.Zero(t)
+						return reflect.Zero(t), e
 					}
 					err = fmt.Errorf("%w with type= %s", ErrUnexpectedResponseContentType, contentType)
-					return reflect.Zero(t)
+					return reflect.Zero(t), err
 				})
 			}
 		case reflect.Slice:
 			if contentType == ContentTypeJson {
-				builder := func(r io.Reader, e error) reflect.Value {
+				builder := func(r io.Reader, e error) (reflect.Value, error) {
 					if e != nil {
-						return reflect.Zero(t)
+						return reflect.Zero(t), e
 					}
 					value := reflect.New(t)
 					decoder := json.NewDecoder(r)
 					if e = decoder.Decode(value.Interface()); e != nil {
-						return reflect.Zero(t)
+						return reflect.Zero(t), e
 					}
-					return value.Elem()
+					return value.Elem(), nil
 				}
 				cache = append(cache, builder)
 			} else {
-				cache = append(cache, func(r io.Reader, e error) reflect.Value {
+				cache = append(cache, func(r io.Reader, e error) (reflect.Value, error) {
 					if e != nil {
-						return reflect.Zero(t)
+						return reflect.Zero(t), e
 					}
-					err = fmt.Errorf("%w with type= %s", ErrUnexpectedResponseContentType, contentType)
-					return reflect.Zero(t)
+					return reflect.Zero(t), fmt.Errorf("%w with type= %s", ErrUnexpectedResponseContentType, contentType)
 				})
 			}
 		case reflect.String:
-			cache = append(cache, func(r io.Reader, e error) reflect.Value {
+			cache = append(cache, func(r io.Reader, e error) (reflect.Value, error) {
 				if e != nil {
-					return reflect.Zero(t)
+					return reflect.Zero(t), e
 				}
 				b, e := io.ReadAll(r)
 				if e != nil {
-					return reflect.Zero(t)
+					return reflect.Zero(t), e
 				}
-				return reflect.ValueOf(string(b))
+				return reflect.ValueOf(string(b)), nil
 			})
 		case reflect.Interface:
 			if IsError(t) {
 				if i != numOut-1 {
 					panic(fmt.Errorf("%w error should be last function result", ErrInvalidRequestFunction))
 				}
-				cache = append(cache, func(r io.Reader, e error) reflect.Value {
+				cache = append(cache, func(r io.Reader, e error) (reflect.Value, error) {
 					if e != nil {
-						return reflect.ValueOf(e)
+						return reflect.ValueOf(e), nil
 					}
-					return _nilError
+					return _nilError, nil
 				})
 			} else {
 				panic(fmt.Errorf("%w only accept error interface as response", ErrInvalidRequestFunction))
 			}
 		default:
-			cache = append(cache, func(r io.Reader, e error) reflect.Value {
-				return reflect.Zero(t)
+			cache = append(cache, func(r io.Reader, e error) (reflect.Value, error) {
+				return reflect.Zero(t), fmt.Errorf("%w with type= %s", ErrUnexpectedResponseContentType, contentType)
 			})
 		}
 	}
 	responseBuilderCache[funcType] = cache
+	e := err
 	for _, builder := range cache {
-		*results = append(*results, builder(data, err))
+		var v reflect.Value
+		v, e = builder(data, e)
+		*results = append(*results, v)
 	}
 }

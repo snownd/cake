@@ -15,11 +15,11 @@ type ContentTypeAlias string
 
 func (c ContentTypeAlias) GetContentType() string {
 	switch c {
-	case ContentTypeJson:
+	case ContentTypeAliasJson:
 		return ContentTypeJson
-	case ContentTypeText:
+	case ContentTypeAliasText:
 		return ContentTypeText
-	case ContentTypeForm:
+	case ContentTypeAliasForm:
 		return ContentTypeForm
 	default:
 		return string(c)

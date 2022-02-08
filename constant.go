@@ -11,6 +11,30 @@ const (
 	ContentTypeForm = "application/x-www-form-urlencoded"
 )
 
+type ContentTypeAlias string
+
+func (c ContentTypeAlias) GetContentType() string {
+	switch c {
+	case ContentTypeJson:
+		return ContentTypeJson
+	case ContentTypeText:
+		return ContentTypeText
+	case ContentTypeForm:
+		return ContentTypeForm
+	default:
+		return string(c)
+	}
+}
+
+const (
+	// alias for ContentTypeJson
+	ContentTypeAliasJson ContentTypeAlias = "json"
+	// alias for ContentTypeText
+	ContentTypeAliasText = "text"
+	// alias for ContentTypeForm
+	ContentTypeAliasForm = "form"
+)
+
 var UserAgent = []string{"cake/" + Version}
 var Accept = []string{ContentTypeJson, ContentTypeText}
 var AcceptEncoding = []string{"gzip", "deflate"}
@@ -45,8 +69,6 @@ const (
 	APIFuncArgTagQuery   = "query"
 	// application/x-www-form-urlencoded
 	APIFuncArgTagForm = "form"
-	// todo
-	// APIFuncArgTagQueryString = "queryString"
 )
 
 const (

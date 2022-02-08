@@ -61,7 +61,7 @@ func main() {
 ```go
 type UserCreateRequestConfig struct {
 	cake.RequestConfig
-  Data *User `body:"application-json"`
+  Data *User `body:"application/json"`
 }
 
 type TestApi struct {
@@ -81,12 +81,12 @@ goos: darwin
 goarch: amd64
 pkg: github.com/snownd/cake
 cpu: Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
-BenchmarkHTTPClientGet             99350             57686 ns/op            6335 B/op         76 allocs/op
-BenchmarkCakeGet                   93720             61451 ns/op            7421 B/op         95 allocs/op
-BenchmarkHTTPClientPost            94305             61676 ns/op            7796 B/op         91 allocs/op
-BenchmarkCakePost                  86124             66718 ns/op            8433 B/op        105 allocs/op
+BenchmarkHTTPClientGet            115776             51330 ns/op            6335 B/op         76 allocs/op
+BenchmarkCakeGet                  104540             56767 ns/op            7422 B/op         95 allocs/op
+BenchmarkHTTPClientPost           106053             56647 ns/op            7796 B/op         91 allocs/op
+BenchmarkCakePost                 100776             70870 ns/op            8449 B/op        105 allocs/op
 PASS
-ok      github.com/snownd/cake  26.251s
+ok      github.com/snownd/cake  28.482s
 
 For Get request, there are 5 out of 19 allocs simply caused by extra headers like Accept, Accept-Encoding and User-Agent.
 ```

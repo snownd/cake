@@ -288,6 +288,44 @@ func TestPostRequestWithBody(t *testing.T) {
 	}
 }
 
+func TestPostRequestWithShortBodytag(t *testing.T) {
+	path := "/foo"
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, path, r.URL.Path)
+		rw.Header().Set("Content-Type", "application/json;charset=utf-8")
+		data, err := io.ReadAll(r.Body)
+		assert.NoError(t, err)
+		rw.Write(data)
+	}))
+	defer ts.Close()
+
+	type testBody struct {
+		Foo string
+		Bar int
+	}
+
+	type config struct {
+		cake.RequestConfig
+		Data testBody `body:"json"`
+	}
+
+	type client struct {
+		PostWithBody func(*config) (*testBody, error) `method:"POST" url:"/foo"`
+	}
+	f := cake.New()
+	defer f.Close()
+	ci, err := f.Build(&client{}, cake.WithBaseURL(ts.URL))
+	if !assert.NoError(t, err) {
+		return
+	}
+	if c, ok := ci.(*client); assert.True(t, ok) {
+		r, err := c.PostWithBody(&config{Data: testBody{Foo: "bar", Bar: 1}})
+		if assert.NoError(t, err) {
+			assert.Equal(t, r.Foo, "bar")
+		}
+	}
+}
+
 func TestPostRequestWithURLEncodedForm(t *testing.T) {
 	path := "/foo"
 	type testForm struct {

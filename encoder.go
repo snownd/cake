@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"strings"
 )
 
 var jsonEncoder = &DefaultJSONEncoder{}
@@ -21,7 +22,7 @@ func (e *DefaultJSONEncoder) EncodeBody(body interface{}) (int, io.Reader, error
 	if err != nil {
 		return 0, nil, err
 	}
-	return len(data), bytes.NewBuffer(data), nil
+	return len(data), bytes.NewReader(data), nil
 }
 
 type DefaultTextEncoder struct {
@@ -34,12 +35,12 @@ func (e *DefaultTextEncoder) ContentType() string {
 func (e *DefaultTextEncoder) EncodeBody(body interface{}) (int, io.Reader, error) {
 	v, ok := body.(string)
 	if ok {
-		return len(v), bytes.NewBufferString(v), nil
+		return len(v), strings.NewReader(v), nil
 	}
 	s, ok := body.(fmt.Stringer)
 	if !ok {
 		return 0, nil, fmt.Errorf("%w expected to be a fmt.Stringer", ErrInvalidBody)
 	}
 	v = s.String()
-	return len(v), bytes.NewBufferString(v), nil
+	return len(v), strings.NewReader(v), nil
 }

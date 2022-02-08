@@ -1,4 +1,18 @@
-# [0.3.1](https://github.com/snownd/cake/compare/v0.3.0...v) (2022-01-03)
+# [](https://github.com/snownd/cake/compare/v0.3.1...v0.4.0) (2022-02-08)
+
+
+### Bug Fixes
+
+* **constant:** getContentType return wront content-type value ([8b71c6e](https://github.com/snownd/cake/commit/8b71c6ef33acf6d18d965612e49f2d9b2c0bf799))
+
+
+### Features
+
+* **requestargs:** support ContentType alias ([98b53de](https://github.com/snownd/cake/commit/98b53def0380c300ac74205ad52db7d17917318b))
+
+
+
+# [0.3.1](https://github.com/snownd/cake/compare/v0.3.0...v0.3.1) (2022-01-03)
 
 
 ### Bug Fixes
@@ -7,7 +21,7 @@
 
 
 
-# [0.3.0](https://github.com/snownd/cake/compare/v0.2.0...v) (2021-12-27)
+# [0.3.0](https://github.com/snownd/cake/compare/v0.2.0...v0.3.0) (2021-12-27)
 
 
 ### Bug Fixes

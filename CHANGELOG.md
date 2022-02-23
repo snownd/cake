@@ -1,4 +1,4 @@
-# [](https://github.com/snownd/cake/compare/v0.3.1...v0.4.0) (2022-02-08)
+# [0.4.0](https://github.com/snownd/cake/compare/v0.3.1...v0.4.0) (2022-02-08)
 
 
 ### Bug Fixes

@@ -63,7 +63,8 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 					if e != nil {
 						return reflect.Zero(t), e
 					}
-					err = fmt.Errorf("%w with type= %s", ErrUnexpectedResponseContentType, contentType)
+					rawRes, _ := io.ReadAll(r)
+					err = fmt.Errorf("%w with type= %s responses data: %s", ErrUnexpectedResponseContentType, contentType, rawRes)
 					return reflect.Zero(t), err
 				})
 			}

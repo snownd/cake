@@ -9,7 +9,7 @@ import (
 	"github.com/snownd/cake"
 )
 
-const mockAPIID = "61567ea3e039a0001725aa18"
+const mockAPIID = ""
 
 type User struct {
 	ID        string    `json:"id"`

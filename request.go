@@ -1,8 +1,8 @@
 package cake
 
 import (
-	"compress/flate"
 	"compress/gzip"
+	"compress/zlib"
 	"context"
 	"fmt"
 	"io"
@@ -155,9 +155,13 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 				err = e
 			}
 		case "deflate":
-			reader := flate.NewReader(res.Body)
+			reader, e := zlib.NewReader(res.Body)
 			defer reader.Close()
-			body = reader
+			if e == nil {
+				body = reader
+			} else {
+				err = e
+			}
 		default:
 			body = res.Body
 		}

@@ -1,4 +1,18 @@
-# [](https://github.com/snownd/cake/compare/v0.3.1...v0.4.0) (2022-02-08)
+# [0.4.2](https://github.com/snownd/cake/compare/v0.4.1...v) (2022-04-21)
+
+
+### Bug Fixes
+
+* **request:** deflate decompress fix ([ee940a5](https://github.com/snownd/cake/commit/ee940a5cecc70c512b872b837eaea97fcf9e33ea))
+
+
+### Features
+
+* **transport:** disable default transport compression ([d99f2d2](https://github.com/snownd/cake/commit/d99f2d2fe83ebe7716916272ba73b94e5bea2a76))
+
+
+
+# [0.4.0](https://github.com/snownd/cake/compare/v0.3.1...v0.4.0) (2022-02-08)
 
 
 ### Bug Fixes

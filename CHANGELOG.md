@@ -1,3 +1,12 @@
+# [0.4.3](https://github.com/snownd/cake/compare/v0.4.2...v) (2022-05-13)
+
+
+### Bug Fixes
+
+* **request:** get contenty type with case sensitive header ([da39a42](https://github.com/snownd/cake/commit/da39a420766011f8726d4332868337d10d1d9baf))
+
+
+
 # [0.4.2](https://github.com/snownd/cake/compare/v0.4.1...v) (2022-04-21)
 
 

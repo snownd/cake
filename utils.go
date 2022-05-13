@@ -3,6 +3,7 @@ package cake
 import (
 	"container/list"
 	"context"
+	"net/http"
 	"reflect"
 )
 
@@ -61,4 +62,16 @@ func embedsType(i interface{}, e reflect.Type) bool {
 		}
 	}
 	return false
+}
+
+// GetContentType returns the content type of the request with try to get not CanonicalMIMEHeader
+func GetContentType(header http.Header) string {
+	ct := header.Get(HeaderContentType)
+	if ct == "" {
+		v, ok := header["content-type"]
+		if ok {
+			ct = v[0]
+		}
+	}
+	return ct
 }

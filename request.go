@@ -165,7 +165,7 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		default:
 			body = res.Body
 		}
-		makeResponse(funcType, res.Header.Get(HeaderContentType), &results, body, err)
+		makeResponse(funcType, GetContentType(res.Header), &results, body, err)
 		return results
 	}), nil
 }

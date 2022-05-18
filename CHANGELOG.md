@@ -1,3 +1,12 @@
+# [0.5.0](https://github.com/snownd/cake/compare/v0.4.3...v) (2022-05-18)
+
+
+### Features
+
+* **request:** real middleware ([0ace156](https://github.com/snownd/cake/commit/0ace1562171b7353872f557e62768cf21e66cf60))
+
+
+
 # [0.4.3](https://github.com/snownd/cake/compare/v0.4.2...v) (2022-05-13)
 
 

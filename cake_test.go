@@ -15,8 +15,15 @@ import (
 
 func TestRequestMiddleware(t *testing.T) {
 	path := "/foo/bar"
+	mw1Path := ""
+	index := 1
 	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, path, r.URL.Path)
+		if assert.Equal(t, 3, index) {
+			index++
+		} else {
+			t.FailNow()
+		}
 		rw.Header().Set("Content-Type", "text/plain")
 		rw.Write([]byte("OK"))
 	}))
@@ -27,11 +34,40 @@ func TestRequestMiddleware(t *testing.T) {
 	}
 	f := cake.New()
 	defer f.Close()
-	mwPath := ""
-	ci, err := f.Build(&client{}, cake.WithBaseURL(ts.URL), cake.WithRequestMiddleware(func(r *http.Request) error {
-		mwPath = r.URL.Path
-		return nil
-	}))
+
+	mw1 := func() cake.RequestHandler {
+		return func(c *cake.RequestContext) error {
+			mw1Path = c.Request.URL.Path
+			if assert.Equal(t, 1, index) {
+				index++
+			}
+			if err := c.Next(); err != nil {
+				return err
+			}
+			if assert.Equal(t, 5, index) {
+				index++
+			}
+			return nil
+		}
+	}
+	mw2 := func() cake.RequestHandler {
+		return func(c *cake.RequestContext) error {
+			if assert.Equal(t, 2, index) {
+				index++
+			}
+			err := c.Next()
+			if assert.NoError(t, err) && assert.Equal(t, 4, index) {
+				index++
+			}
+			return nil
+		}
+	}
+
+	ci, err := f.Build(&client{},
+		cake.WithBaseURL(ts.URL),
+		cake.WithRequestMiddleware(mw1),
+		cake.WithRequestMiddleware(mw2),
+	)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -39,7 +75,7 @@ func TestRequestMiddleware(t *testing.T) {
 		r, err := c.SimpleGet(context.Background())
 		if assert.NoError(t, err) {
 			assert.Equal(t, "OK", r)
-			assert.Equal(t, path, mwPath)
+			assert.Equal(t, path, mw1Path)
 		}
 	}
 }

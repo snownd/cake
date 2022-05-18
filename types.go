@@ -7,7 +7,29 @@ import (
 	"strconv"
 )
 
-type RequestMiddleware func(*http.Request) error
+type RequestMiddlewareDesprate func(*http.Request) error
+
+type RequestContext struct {
+	Request  *http.Request
+	Response *http.Response
+	index    int
+	handlers []RequestHandler
+}
+
+func (c *RequestContext) Next() error {
+	c.index++
+	for c.index < len(c.handlers) {
+		if err := c.handlers[c.index](c); err != nil {
+			return err
+		}
+		c.index++
+	}
+	return nil
+}
+
+type RequestHandler func(c *RequestContext) error
+
+type RequestMiddleware func() RequestHandler
 
 type cakeConfigSentinel interface {
 	cakeConfigSentinel()

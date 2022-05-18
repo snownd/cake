@@ -110,6 +110,13 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 			return r
 		}
 	}
+	lastIndex := len(opts.requestMws)
+	rc := &RequestContext{
+		handlers: make([]RequestHandler, len(opts.requestMws)+1),
+	}
+	for i, mw := range opts.requestMws {
+		rc.handlers[i] = mw()
+	}
 	return reflect.MakeFunc(funcType, func(args []reflect.Value) []reflect.Value {
 		r := newRequest(method, opts)
 		for _, builder := range builders {
@@ -123,18 +130,15 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 			panic(err)
 		}
 		results := make([]reflect.Value, 0, funcType.NumOut())
-		for _, f := range opts.requestMws {
-			err = f(req)
-			if err != nil {
-				makeResponse(funcType, "", &results, nil, err)
-				return results
-			}
-		}
-		res, err := opts.client.Do(req)
+		rc.Request = req
+		h := newRequestRunner(opts.client)
+		rc.handlers[lastIndex] = h
+		err = rc.handlers[0](rc)
 		if err != nil {
-			makeResponse(funcType, "", &results, nil, err)
+			makeResponse(funcType, "", &results, nil, NewRequestError(req, rc.Response))
 			return results
 		}
+		res := rc.Response
 		defer res.Body.Close()
 		if funcType.NumOut() == 0 {
 			return results
@@ -194,4 +198,15 @@ func newHTTPRequest(r *requestTemplate) (*http.Request, error) {
 	req.Header[HeaderAcceptEncoding] = AcceptEncoding
 
 	return req, nil
+}
+
+func newRequestRunner(client *http.Client) RequestHandler {
+	return func(c *RequestContext) error {
+		res, err := client.Do(c.Request)
+		if err != nil {
+			return err
+		}
+		c.Response = res
+		return c.Next()
+	}
 }

@@ -74,21 +74,20 @@ For more, see [example](./example/main.go)
 
 ### Performance
 
-Ran `GOMAXPROCS=1 go test -bench=. -benchtime=5s -benchmem` on a Macbook Pro 2017 i5 with go1.16.7:
+Ran `GOMAXPROCS=1 go test -bench=. -benchtime=5s -benchmem` on a Macbook Pro 14(M1 Pro) with go1.18:
 
 ```
 goos: darwin
-goarch: amd64
+goarch: arm64
 pkg: github.com/snownd/cake
-cpu: Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
-BenchmarkHTTPClientGet            115776             51330 ns/op            6335 B/op         76 allocs/op
-BenchmarkCakeGet                  104540             56767 ns/op            7422 B/op         95 allocs/op
-BenchmarkHTTPClientPost           106053             56647 ns/op            7796 B/op         91 allocs/op
-BenchmarkCakePost                 100776             70870 ns/op            8449 B/op        105 allocs/op
+BenchmarkHTTPClientGet            240624             23627 ns/op            6368 B/op         76 allocs/op
+BenchmarkCakeGet                  235514             24969 ns/op            7479 B/op         96 allocs/op
+BenchmarkHTTPClientPost           239326             24438 ns/op            7841 B/op         91 allocs/op
+BenchmarkCakePost                 222906             26909 ns/op            8866 B/op        106 allocs/op
 PASS
-ok      github.com/snownd/cake  28.482s
+ok      github.com/snownd/cake  24.612s
 
-For Get request, there are 5 out of 19 allocs simply caused by extra headers like Accept, Accept-Encoding and User-Agent.
+For Get request, there are 5 out of 20 allocs simply caused by extra headers like Accept, Accept-Encoding and User-Agent.
 ```
 
-There is a bit of performance impacts because of uses of reflect. Still, it should be fast enough for most cases.
+There is a bit of performance impacts because of uses of reflect(nearly 8%). Still, it should be fast enough for most cases.

@@ -1,3 +1,12 @@
+# [0.5.1](https://github.com/snownd/cake/compare/v0.5.0...v) (2022-08-25)
+
+
+### Bug Fixes
+
+* **response:** fix content-type changed cache problems ([c958fcd](https://github.com/snownd/cake/commit/c958fcd80e0d962518a274cd751243db62914f2d))
+
+
+
 # [0.5.0](https://github.com/snownd/cake/compare/v0.4.3...v) (2022-05-18)
 
 

@@ -12,9 +12,14 @@ import (
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
 
-type responseBuilder = func(io.Reader, error) (reflect.Value, error)
+type responseValueBuilder = func(io.Reader, error) (reflect.Value, error)
 
-var responseBuilderCache map[reflect.Type][]responseBuilder = make(map[reflect.Type][]responseBuilder)
+type responseBuilder struct {
+	contentType string
+	builders    []responseValueBuilder
+}
+
+var responseBuilderCache map[reflect.Type]responseBuilder = make(map[reflect.Type]responseBuilder)
 var resMutex *sync.RWMutex = &sync.RWMutex{}
 
 func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.Value, data io.Reader, err error) {
@@ -22,16 +27,16 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 	cache, ok := responseBuilderCache[funcType]
 	resMutex.RUnlock()
 	// data, err := io.ReadAll(body)
-	if ok {
+	if ok && cache.contentType == contentType {
 		e := err
-		for _, builder := range cache {
+		for _, builder := range cache.builders {
 			var v reflect.Value
 			v, e = builder(data, e)
 			*results = append(*results, v)
 		}
 		return
 	}
-	cache = make([]responseBuilder, 0)
+	cache = responseBuilder{}
 	resMutex.Lock()
 	defer resMutex.Unlock()
 	numOut := funcType.NumOut()
@@ -57,9 +62,9 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 					}
 					return value, nil
 				}
-				cache = append(cache, builder)
+				cache.builders = append(cache.builders, builder)
 			} else {
-				cache = append(cache, func(r io.Reader, e error) (reflect.Value, error) {
+				cache.builders = append(cache.builders, func(r io.Reader, e error) (reflect.Value, error) {
 					if e != nil {
 						return reflect.Zero(t), e
 					}
@@ -81,9 +86,9 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 					}
 					return value.Elem(), nil
 				}
-				cache = append(cache, builder)
+				cache.builders = append(cache.builders, builder)
 			} else {
-				cache = append(cache, func(r io.Reader, e error) (reflect.Value, error) {
+				cache.builders = append(cache.builders, func(r io.Reader, e error) (reflect.Value, error) {
 					if e != nil {
 						return reflect.Zero(t), e
 					}
@@ -91,7 +96,7 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 				})
 			}
 		case reflect.String:
-			cache = append(cache, func(r io.Reader, e error) (reflect.Value, error) {
+			cache.builders = append(cache.builders, func(r io.Reader, e error) (reflect.Value, error) {
 				if e != nil {
 					return reflect.Zero(t), e
 				}
@@ -106,7 +111,7 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 				if i != numOut-1 {
 					panic(fmt.Errorf("%w error should be last function result", ErrInvalidRequestFunction))
 				}
-				cache = append(cache, func(r io.Reader, e error) (reflect.Value, error) {
+				cache.builders = append(cache.builders, func(r io.Reader, e error) (reflect.Value, error) {
 					if e != nil {
 						return reflect.ValueOf(e), nil
 					}
@@ -116,14 +121,14 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 				panic(fmt.Errorf("%w only accept error interface as response", ErrInvalidRequestFunction))
 			}
 		default:
-			cache = append(cache, func(r io.Reader, e error) (reflect.Value, error) {
+			cache.builders = append(cache.builders, func(r io.Reader, e error) (reflect.Value, error) {
 				return reflect.Zero(t), fmt.Errorf("%w with type= %s", ErrUnexpectedResponseContentType, contentType)
 			})
 		}
 	}
 	responseBuilderCache[funcType] = cache
 	e := err
-	for _, builder := range cache {
+	for _, builder := range cache.builders {
 		var v reflect.Value
 		v, e = builder(data, e)
 		*results = append(*results, v)

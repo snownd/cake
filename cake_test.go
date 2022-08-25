@@ -35,32 +35,28 @@ func TestRequestMiddleware(t *testing.T) {
 	f := cake.New()
 	defer f.Close()
 
-	mw1 := func() cake.RequestHandler {
-		return func(c *cake.RequestContext) error {
-			mw1Path = c.Request.URL.Path
-			if assert.Equal(t, 1, index) {
-				index++
-			}
-			if err := c.Next(); err != nil {
-				return err
-			}
-			if assert.Equal(t, 5, index) {
-				index++
-			}
-			return nil
+	mw1 := func(c *cake.RequestContext) error {
+		mw1Path = c.Request.URL.Path
+		if assert.Equal(t, 1, index) {
+			index++
 		}
+		if err := c.Next(); err != nil {
+			return err
+		}
+		if assert.Equal(t, 5, index) {
+			index++
+		}
+		return nil
 	}
-	mw2 := func() cake.RequestHandler {
-		return func(c *cake.RequestContext) error {
-			if assert.Equal(t, 2, index) {
-				index++
-			}
-			err := c.Next()
-			if assert.NoError(t, err) && assert.Equal(t, 4, index) {
-				index++
-			}
-			return nil
+	mw2 := func(c *cake.RequestContext) error {
+		if assert.Equal(t, 2, index) {
+			index++
 		}
+		err := c.Next()
+		if assert.NoError(t, err) && assert.Equal(t, 4, index) {
+			index++
+		}
+		return nil
 	}
 
 	ci, err := f.Build(&client{},

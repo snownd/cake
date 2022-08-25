@@ -29,7 +29,7 @@ func (c *RequestContext) Next() error {
 
 type RequestHandler func(c *RequestContext) error
 
-type RequestMiddleware func() RequestHandler
+type RequestMiddleware = RequestHandler
 
 type cakeConfigSentinel interface {
 	cakeConfigSentinel()

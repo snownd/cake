@@ -115,7 +115,7 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		handlers: make([]RequestHandler, len(opts.requestMws)+1),
 	}
 	for i, mw := range opts.requestMws {
-		rc.handlers[i] = mw()
+		rc.handlers[i] = mw
 	}
 	return reflect.MakeFunc(funcType, func(args []reflect.Value) []reflect.Value {
 		r := newRequest(method, opts)

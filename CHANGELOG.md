@@ -1,4 +1,13 @@
-# [0.5.1](https://github.com/snownd/cake/compare/v0.5.0...v) (2022-08-25)
+# [0.5.2](https://github.com/snownd/cake/compare/v0.5.1...v) (2022-09-05)
+
+
+### Bug Fixes
+
+* **response:** content-type cache ([5828d2d](https://github.com/snownd/cake/commit/5828d2db9adc0c1d8c10f0ae3745ce3d937a0631))
+
+
+
+## [0.5.1](https://github.com/snownd/cake/compare/v0.5.0...v0.5.1) (2022-08-25)
 
 
 ### Bug Fixes
@@ -7,7 +16,7 @@
 
 
 
-# [0.5.0](https://github.com/snownd/cake/compare/v0.4.3...v) (2022-05-18)
+# [0.5.0](https://github.com/snownd/cake/compare/v0.4.3...v0.5.0) (2022-05-18)
 
 
 ### Features
@@ -16,7 +25,7 @@
 
 
 
-# [0.4.3](https://github.com/snownd/cake/compare/v0.4.2...v) (2022-05-13)
+## [0.4.3](https://github.com/snownd/cake/compare/v0.4.2...v0.4.3) (2022-05-13)
 
 
 ### Bug Fixes
@@ -25,7 +34,7 @@
 
 
 
-# [0.4.2](https://github.com/snownd/cake/compare/v0.4.1...v) (2022-04-21)
+## [0.4.2](https://github.com/snownd/cake/compare/v0.4.1...v0.4.2) (2022-04-21)
 
 
 ### Bug Fixes
@@ -39,7 +48,7 @@
 
 
 
-# [0.4.0](https://github.com/snownd/cake/compare/v0.3.1...v0.4.0) (2022-02-08)
+## [0.4.1](https://github.com/snownd/cake/compare/v0.4.0...v0.4.1) (2022-02-13)
 
 
 ### Bug Fixes
@@ -53,7 +62,7 @@
 
 
 
-# [0.3.1](https://github.com/snownd/cake/compare/v0.3.0...v0.3.1) (2022-01-03)
+## [0.3.1](https://github.com/snownd/cake/compare/v0.3.0...v0.3.1) (2022-01-03)
 
 
 ### Bug Fixes
@@ -88,7 +97,7 @@
 ### Features
 
 * **cake:** add globalBuildOptions ([998022e](https://github.com/snownd/cake/commit/998022e086b143ab9c2623085a1df37702fb6b05))
-* **request** RequestMiddleware ([e0bf1e6](https://github.com/snownd/cake/commit/e0bf1e6a647b77431c73065b8fb6a4f1b6bf265e))
+* RequestMiddleware ([e0bf1e6](https://github.com/snownd/cake/commit/e0bf1e6a647b77431c73065b8fb6a4f1b6bf265e))
 
 
 

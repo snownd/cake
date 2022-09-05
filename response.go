@@ -36,7 +36,9 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 		}
 		return
 	}
-	cache = responseBuilder{}
+	cache = responseBuilder{
+		contentType: contentType,
+	}
 	resMutex.Lock()
 	defer resMutex.Unlock()
 	numOut := funcType.NumOut()

@@ -1,3 +1,14 @@
+# [0.5.3](https://github.com/snownd/cake/compare/v0.5.2...v) (2022-09-14)
+
+
+### Bug Fixes
+
+* **request:** middleware problems ([753408a](https://github.com/snownd/cake/commit/753408ad5ed5ed49ee5a22b6c2d9d47c69aaec19))
+* **response:** content-type cache ([652a1f4](https://github.com/snownd/cake/commit/652a1f4f95ac96e6fc22950e9e9e9e00f783863f))
+* **response:** handle error ([cb03073](https://github.com/snownd/cake/commit/cb030739633227363cdd69c78c6014795fd5cda8))
+
+
+
 # [0.5.2](https://github.com/snownd/cake/compare/v0.5.1...v) (2022-09-05)
 
 

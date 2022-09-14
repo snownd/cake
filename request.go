@@ -111,12 +111,6 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		}
 	}
 	lastIndex := len(opts.requestMws)
-	rc := &RequestContext{
-		handlers: make([]RequestHandler, len(opts.requestMws)+1),
-	}
-	for i, mw := range opts.requestMws {
-		rc.handlers[i] = mw
-	}
 	return reflect.MakeFunc(funcType, func(args []reflect.Value) []reflect.Value {
 		r := newRequest(method, opts)
 		for _, builder := range builders {
@@ -129,8 +123,14 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		if err != nil {
 			panic(err)
 		}
+		rc := &RequestContext{
+			Request:  req,
+			handlers: make([]RequestHandler, len(opts.requestMws)+1),
+		}
+		for i, mw := range opts.requestMws {
+			rc.handlers[i] = mw
+		}
 		results := make([]reflect.Value, 0, funcType.NumOut())
-		rc.Request = req
 		h := newRequestRunner(opts.client)
 		rc.handlers[lastIndex] = h
 		err = rc.handlers[0](rc)

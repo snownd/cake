@@ -27,7 +27,7 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 	cache, ok := responseBuilderCache[funcType]
 	resMutex.RUnlock()
 	// data, err := io.ReadAll(body)
-	if ok && cache.contentType == contentType {
+	if ok && (cache.contentType == contentType || err != nil) {
 		e := err
 		for _, builder := range cache.builders {
 			var v reflect.Value

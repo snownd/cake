@@ -51,7 +51,15 @@ func main() {
 	factory := cake.New()
 	defer factory.Close()
 	// click https://mockapi.io/clone/61567ea3e039a0001725aa19 to create a mockapi project
-	apiIntf, err := factory.Build(&TestApi{}, cake.WithBaseURL("https://"+mockAPIID+".mockapi.io/api/v1"))
+	apiIntf, err := factory.Build(&TestApi{}, cake.WithBaseURL("https://"+mockAPIID+".mockapi.io/api/v1"), cake.WithRequestMiddleware(func(c *cake.RequestContext) error {
+		url := c.Request.URL.String()
+		method := c.Request.Method
+		fmt.Println("requestTo", url, "method", method)
+		start := time.Now()
+		c.Next()
+		fmt.Println("requestTo", url, "cost", time.Since(start))
+		return nil
+	}))
 	if err != nil {
 		panic(err)
 	}

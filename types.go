@@ -97,11 +97,15 @@ type RequestError interface {
 }
 
 type requestError struct {
+	err error
 	req *http.Request
 	res *http.Response
 }
 
 func (re requestError) Error() string {
+	if re.err != nil {
+		return re.Error()
+	}
 	if re.res == nil {
 		return ErrRequestFailed.Error()
 	}
@@ -109,6 +113,9 @@ func (re requestError) Error() string {
 }
 
 func (re requestError) Unwrap() error {
+	if re.err != nil {
+		return re.err
+	}
 	return ErrRequestFailed
 }
 
@@ -128,5 +135,9 @@ func (re requestError) Response() *http.Response {
 }
 
 func NewRequestError(req *http.Request, res *http.Response) RequestError {
-	return &requestError{req: req, res: res}
+	return newRequestError(ErrRequestFailed, req, res)
+}
+
+func newRequestError(err error, req *http.Request, res *http.Response) RequestError {
+	return &requestError{err: err, req: req, res: res}
 }

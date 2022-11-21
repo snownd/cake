@@ -135,7 +135,7 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 		rc.handlers[lastIndex] = h
 		err = rc.handlers[0](rc)
 		if err != nil {
-			makeResponse(funcType, "", &results, nil, NewRequestError(req, rc.Response))
+			makeResponse(funcType, "", &results, nil, newRequestError(err, req, rc.Response))
 			return results
 		}
 		res := rc.Response

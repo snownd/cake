@@ -102,6 +102,9 @@ type requestError struct {
 }
 
 func (re requestError) Error() string {
+	if re.res == nil {
+		return ErrRequestFailed.Error()
+	}
 	return ErrRequestFailed.Error() + " with response status:" + re.res.Status
 }
 
@@ -110,6 +113,9 @@ func (re requestError) Unwrap() error {
 }
 
 func (re requestError) StatusCode() int {
+	if re.res == nil {
+		return -1
+	}
 	return re.res.StatusCode
 }
 

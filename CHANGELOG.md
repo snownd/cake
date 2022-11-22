@@ -1,3 +1,12 @@
+# [](https://github.com/snownd/cake/compare/v0.5.4...v) (2022-11-22)
+
+
+### Bug Fixes
+
+* **types:** request error Error() ([63c121d](https://github.com/snownd/cake/commit/63c121de31c324daf9d0a6f073c683ce794adb2c))
+
+
+
 # [v0.5.4](https://github.com/snownd/cake/compare/v0.5.1...v) (2022-11-21)
 
 

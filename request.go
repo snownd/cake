@@ -127,9 +127,7 @@ func makeRequestFunction(funcType reflect.Type, defination reflect.StructField, 
 			Request:  req,
 			handlers: make([]RequestHandler, len(opts.requestMws)+1),
 		}
-		for i, mw := range opts.requestMws {
-			rc.handlers[i] = mw
-		}
+		copy(rc.handlers, opts.requestMws)
 		results := make([]reflect.Value, 0, funcType.NumOut())
 		h := newRequestRunner(opts.client)
 		rc.handlers[lastIndex] = h

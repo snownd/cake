@@ -29,7 +29,7 @@ type DefaultTextEncoder struct {
 }
 
 func (e *DefaultTextEncoder) ContentType() string {
-	return ContentTypeJson
+	return ContentTypeText
 }
 
 func (e *DefaultTextEncoder) EncodeBody(body interface{}) (int, io.Reader, error) {

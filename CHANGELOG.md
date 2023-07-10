@@ -1,4 +1,18 @@
-# [](https://github.com/snownd/cake/compare/v0.5.4...v) (2022-11-22)
+# [v0.6.0](https://github.com/snownd/cake/compare/v0.5.5...v0.6.0) (2023-07-10)
+
+
+### Bug Fixes
+
+* **encoder:** wrong DefaultTextEncoder ContentType ([d76161c](https://github.com/snownd/cake/commit/d76161c1b707df66ffa5ee7b1a0a95d607faa5f1))
+
+
+### Features
+
+* **types:** request error with response body ([f49e598](https://github.com/snownd/cake/commit/f49e598a238c0c0f9dd3585358aee0ac077c5f4f))
+
+
+
+# [v0.5.5](https://github.com/snownd/cake/compare/v0.5.4...v.5.5) (2022-11-22)
 
 
 ### Bug Fixes
@@ -7,7 +21,7 @@
 
 
 
-# [v0.5.4](https://github.com/snownd/cake/compare/v0.5.1...v) (2022-11-21)
+# [v0.5.4](https://github.com/snownd/cake/compare/v0.5.1...v.5.4) (2022-11-21)
 
 
 ### Bug Fixes
@@ -19,7 +33,7 @@
 
 
 
-# [0.5.3](https://github.com/snownd/cake/compare/v0.5.2...v) (2022-09-14)
+# [0.5.3](https://github.com/snownd/cake/compare/v0.5.2...v0.5.3) (2022-09-14)
 
 
 ### Bug Fixes
@@ -30,7 +44,7 @@
 
 
 
-# [0.5.2](https://github.com/snownd/cake/compare/v0.5.1...v) (2022-09-05)
+# [0.5.2](https://github.com/snownd/cake/compare/v0.5.1...v0.5.2) (2022-09-05)
 
 
 ### Bug Fixes

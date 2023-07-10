@@ -20,7 +20,8 @@ func createTransport() *http.Transport {
 		IdleConnTimeout:       30 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
-		MaxIdleConnsPerHost:   runtime.NumCPU(),
+		MaxIdleConnsPerHost:   runtime.NumCPU() * 4,
+		MaxConnsPerHost:       runtime.NumCPU() * 4,
 		DisableCompression:    true,
 	}
 }

@@ -99,7 +99,7 @@ func main() {
 	if err != nil {
 		var rErr cake.RequestError
 		if errors.As(err, &rErr) {
-			fmt.Println("expect 404, got:", rErr.StatusCode())
+			fmt.Printf("expect 404, got: %d ,res %s \n", rErr.StatusCode(), rErr.Body())
 		} else {
 			panic(err)
 		}

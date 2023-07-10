@@ -94,12 +94,14 @@ type RequestError interface {
 	StatusCode() int
 	Request() *http.Request
 	Response() *http.Response
+	Body() []byte
 }
 
 type requestError struct {
-	err error
-	req *http.Request
-	res *http.Response
+	err  error
+	req  *http.Request
+	res  *http.Response
+	body []byte
 }
 
 func (re requestError) Error() string {
@@ -134,10 +136,18 @@ func (re requestError) Response() *http.Response {
 	return re.res
 }
 
+func (re requestError) Body() []byte {
+	return re.body
+}
+
 func NewRequestError(req *http.Request, res *http.Response) RequestError {
 	return newRequestError(ErrRequestFailed, req, res)
 }
 
 func newRequestError(err error, req *http.Request, res *http.Response) RequestError {
-	return &requestError{err: err, req: req, res: res}
+	var body []byte
+	if res != nil {
+		body, _ = io.ReadAll(res.Body)
+	}
+	return &requestError{err: err, req: req, res: res, body: body}
 }

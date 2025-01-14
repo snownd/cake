@@ -123,7 +123,9 @@ func (re requestError) Unwrap() error {
 
 func (re requestError) StatusCode() int {
 	if re.res == nil {
-		return -1
+		// The HTTP 499 status code is not a standard HTTP status code, meaning it is not defined in the HTTP/1.1 specification.
+		// This status code is used by the nginx web server to indicate that the client closed the connection before the server could send a response
+		return 499
 	}
 	return re.res.StatusCode
 }

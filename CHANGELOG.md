@@ -1,3 +1,16 @@
+# [v0.6.1](https://github.com/snownd/cake/compare/v0.6.0...v0.6.1) (2025-01-14)
+
+
+### Bug Fixes
+
+* **encoder:** wrong DefaultTextEncoder ContentType ([06cf37b](https://github.com/snownd/cake/commit/06cf37be35c278cde5c7c41805361091a50c17de))
+
+
+### Features
+
+* **cake:** add default baseUrl ([fed0e5f](https://github.com/snownd/cake/commit/fed0e5f96e38239a67d85063c50a821dad26eac9))
+
+
 # [v0.6.0](https://github.com/snownd/cake/compare/v0.5.5...v0.6.0) (2023-07-10)
 
 

@@ -61,7 +61,8 @@ func main() {
 ```go
 type UserCreateRequestConfig struct {
 	cake.RequestConfig
-  Data *User `body:"application/json"`
+	// Data *User `body:"application/json"`  `json` is `application/json` alias
+  Data *User `body:"json"`
 }
 
 type TestApi struct {

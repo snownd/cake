@@ -71,6 +71,7 @@ func (f *Factory) Build(target interface{}, opts ...BuildOption) (interface{}, e
 		return nil, ErrInvalidBuildTarget
 	}
 	bopts := &buildOptions{
+		baseUrl:     "http://127.0.0.1",
 		client:      f.client,
 		contentType: ContentTypeText,
 		encoders: map[string]BodyEncoder{

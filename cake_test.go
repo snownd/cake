@@ -432,3 +432,40 @@ func TestResponseErr(t *testing.T) {
 		}
 	}
 }
+
+type bres struct {
+	Code int    `json:"code"`
+	Data string `json:"data"`
+}
+
+func (r *bres) UnmarshalBinary(v []byte) error {
+	json.Unmarshal(v, r)
+	return nil
+}
+
+func TestResponseBinary(t *testing.T) {
+	path := "/foo"
+	ts := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, path, r.URL.Path)
+		rw.Header().Set("Content-Type", "text/plain")
+		rw.Write([]byte(`{"code": 0, "data": "bar"}`))
+	}))
+	defer ts.Close()
+
+	type client struct {
+		SimpleGet func() (*bres, error) `url:"/foo"`
+	}
+	f := cake.New()
+	defer f.Close()
+	ci, err := f.Build(&client{}, cake.WithBaseURL(ts.URL))
+	if !assert.NoError(t, err) {
+		return
+	}
+	if c, ok := ci.(*client); assert.True(t, ok) {
+		r, err := c.SimpleGet()
+		if err != nil {
+			log.Fatal("should not have error", err)
+		}
+		assert.Equal(t, r.Data, "bar")
+	}
+}

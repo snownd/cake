@@ -1,6 +1,7 @@
 package cake
 
 import (
+	"encoding"
 	"fmt"
 	"io"
 	"reflect"
@@ -53,7 +54,22 @@ func makeResponse(funcType reflect.Type, contentType string, results *[]reflect.
 		t := funcType.Out(i)
 		switch t.Kind() {
 		case reflect.Ptr:
-			if strings.HasPrefix(contentType, ContentTypeJson) {
+			if t.Implements(_binaryUnmarshalerType) {
+				cache.builders = append(cache.builders, func(r io.Reader, e error) (reflect.Value, error) {
+					if e != nil {
+						return reflect.Zero(t), e
+					}
+					value := reflect.New(t.Elem())
+					data, e := io.ReadAll(r)
+					if e != nil {
+						return reflect.Zero(t), e
+					}
+					if e := value.Interface().(encoding.BinaryUnmarshaler).UnmarshalBinary(data); e != nil {
+						return reflect.Zero(t), e
+					}
+					return value, nil
+				})
+			} else if strings.HasPrefix(contentType, ContentTypeJson) {
 				builder := func(r io.Reader, e error) (reflect.Value, error) {
 					if e != nil {
 						return reflect.Zero(t), e

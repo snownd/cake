@@ -3,6 +3,7 @@ package cake
 import (
 	"container/list"
 	"context"
+	"encoding"
 	"net/http"
 	"reflect"
 )
@@ -12,6 +13,7 @@ var _contextPtr *context.Context
 var _contextType = reflect.TypeOf(_contextPtr).Elem()
 var _errorPtr *error
 var _errorType = reflect.TypeOf(_errorPtr).Elem()
+var _binaryUnmarshalerType = reflect.TypeOf((*encoding.BinaryUnmarshaler)(nil)).Elem()
 
 func IsRequestConfig(o interface{}) bool {
 	return embedsType(o, _requestConfigType)

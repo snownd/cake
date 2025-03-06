@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-const Version = "0.6.1"
+const Version = "0.6.2"
 
 type Factory struct {
 	lock               *sync.RWMutex

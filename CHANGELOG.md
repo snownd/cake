@@ -1,3 +1,12 @@
+# [v0.6.2](https://github.com/snownd/cake/compare/v0.6.1...v) (2025-03-06)
+
+
+### Features
+
+* **response:** parse res implements BinaryUnmarshaler ([b9b0445](https://github.com/snownd/cake/commit/b9b0445741f45e09d520cb855e2db4e633e09be2))
+
+
+
 # [v0.6.1](https://github.com/snownd/cake/compare/v0.6.0...v0.6.1) (2025-01-14)
 
 
